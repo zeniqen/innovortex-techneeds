@@ -15,6 +15,22 @@
   --text-primary: var(--color-caviar);
   --text-secondary: var(--color-iron-fixture);
   --accent-muted: var(--color-stone-haze);
+
+  /* Leaderboard accents. The board is the one surface on the site that
+     carries colour, so the palette lives here as tokens rather than as
+     scattered hex values across the component. */
+  --color-plum-deep: #17092F;
+  --color-plum: #3F1D95;
+  --color-plum-bright: #6D28D9;
+  --color-gold: #F7C948;
+  --color-gold-deep: #D99A00;
+  --color-platinum: #D5DAE3;
+  --color-platinum-deep: #9AA3B2;
+  --color-bronze: #EB9A5C;
+  --color-bronze-deep: #B9621F;
+  --color-amber: #F59E0B;
+  --color-gain: #15803D;
+  --color-loss: #DC2626;
 }
 
 @theme inline {
@@ -25,6 +41,18 @@
   --color-iron-fixture: var(--color-iron-fixture);
   --color-caviar: var(--color-caviar);
   --color-primary: var(--color-caviar);
+  --color-plum-deep: var(--color-plum-deep);
+  --color-plum: var(--color-plum);
+  --color-plum-bright: var(--color-plum-bright);
+  --color-gold: var(--color-gold);
+  --color-gold-deep: var(--color-gold-deep);
+  --color-platinum: var(--color-platinum);
+  --color-platinum-deep: var(--color-platinum-deep);
+  --color-bronze: var(--color-bronze);
+  --color-bronze-deep: var(--color-bronze-deep);
+  --color-amber: var(--color-amber);
+  --color-gain: var(--color-gain);
+  --color-loss: var(--color-loss);
 }
 
 body {
@@ -56,4 +84,66 @@ body {
   background-image: 
     linear-gradient(to right, rgba(192, 191, 189, 0.25) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(192, 191, 189, 0.25) 1px, transparent 1px);
+}
+
+/* --- Leaderboard --- */
+
+/* The purple band behind the leaderboard header and podium. */
+.bg-plum-band {
+  background-color: var(--color-plum-deep);
+  background-image:
+    radial-gradient(
+      90% 70% at 50% 0%,
+      rgba(109, 40, 217, 0.6) 0%,
+      rgba(109, 40, 217, 0) 65%
+    ),
+    linear-gradient(
+      180deg,
+      var(--color-plum) 0%,
+      #2a1159 45%,
+      var(--color-plum-deep) 100%
+    );
+}
+
+/* Faint grid over the purple band. */
+.bg-plum-grid {
+  background-size: 32px 32px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+}
+
+/* The "climb the leaderboard" banner. */
+.bg-plum-banner {
+  background-image: linear-gradient(
+    120deg,
+    #7c3aed 0%,
+    var(--color-plum-bright) 55%,
+    #5b21b6 100%
+  );
+}
+
+/* Podium rank badges, one per place. */
+.bg-badge-gold {
+  background-image: linear-gradient(
+    180deg,
+    var(--color-gold) 0%,
+    var(--color-gold-deep) 100%
+  );
+}
+
+.bg-badge-platinum {
+  background-image: linear-gradient(
+    180deg,
+    var(--color-platinum) 0%,
+    var(--color-platinum-deep) 100%
+  );
+}
+
+.bg-badge-bronze {
+  background-image: linear-gradient(
+    180deg,
+    var(--color-bronze) 0%,
+    var(--color-bronze-deep) 100%
+  );
 }

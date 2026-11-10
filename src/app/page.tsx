@@ -4,7 +4,6 @@ import Mission from "@/components/mission";
 import Cohorts from "@/components/cohorts";
 import Glimpse from "@/components/glimpse";
 import Testimonials from "@/components/testimonials";
-import CtaBanner from "@/components/cta-banner";
 import Footer from "@/components/footer";
 import FloatingDockDemo from "@/components/floating-dock-demo";
 import { PageReveal } from "@/components/ui/page-reveal";
@@ -21,7 +20,6 @@ export default function Home() {
           <Cohorts />
           <Glimpse />
           <Testimonials />
-          <CtaBanner />
         </PageReveal>
       </main>
 

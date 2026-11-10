@@ -208,8 +208,7 @@ grep -n "widthIcon\|heightIcon\|{ width, height }" src/components/ui/floating-do
 
 # No over-broad transitions in the touched components
 grep -n "transition-all" src/components/ui/floating-dock.tsx src/components/hero.tsx \
-  src/components/cta-banner.tsx src/components/stats.tsx src/components/mission.tsx \
-  src/components/ui/carousel.tsx
+  src/components/stats.tsx src/components/mission.tsx src/components/ui/carousel.tsx
 
 # Every hover transform is pointer-gated (Tailwind v4 does this for `hover:`;
 # `group-hover:` is the only escape hatch and there should be none left)

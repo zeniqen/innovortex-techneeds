@@ -49,23 +49,16 @@ on hover but never acknowledge the press:
                 className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm text-[var(--color-caviar)] bg-[var(--color-night-white)] hover:bg-[var(--color-spotted-dove)]/40 border border-[var(--color-spotted-dove)] transition-all hover:-translate-y-0.5 active:translate-y-0"
 ```
 
-`src/components/cta-banner.tsx:37` — current:
-
-```tsx
-                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-sm font-bold text-[var(--color-caviar)] bg-[var(--color-emptiness)] hover:bg-[var(--color-night-white)] shadow-md transition-all hover:scale-105"
-```
-
-`src/components/cta-banner.tsx:45` — current:
-
-```tsx
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold text-[var(--color-emptiness)] bg-[var(--color-iron-fixture)] hover:bg-[var(--color-stone-haze)] border border-[var(--color-stone-haze)] transition-all hover:scale-105"
-```
-
 Note the two hero buttons use `active:translate-y-0` — that is a *hover
 cancellation*, not press feedback. On hover the button lifts `-translate-y-0.5`;
 on press it returns to `translate-y-0`, so pressing makes the button *drop
 back down* by 2px. That reads as "the button fell", not "the button was
-pressed". The CTAs in `cta-banner.tsx` have no `:active` rule at all.
+pressed".
+
+(The CTA banner that used to sit at the bottom of the home page — with its
+own two buttons — has since been removed from the page, so it is no longer
+part of this plan's scope. If it ever comes back, its two buttons have the
+same gap: `transition-all` with `hover:scale-105` and no `:active` rule.)
 
 Per the playbook: press feedback is `transform: scale(0.97)` on `:active` with
 `transition: transform 160ms ease-out`, kept subtle (0.95–0.98).
@@ -167,10 +160,6 @@ Note both `transition-colors` and `transition-transform` are present — they
 set different properties (`color`/`background-color` vs `transform`), so
 Tailwind emits both and they do not conflict.
 
-**`src/components/cta-banner.tsx:37` and `:45`** — replace `transition-all`
-with `transition-colors transition-transform duration-150 ease-strong-out`
-and add `active:scale-[0.97]`.
-
 ## Repo conventions to follow
 
 - Palette is always referenced through `var(--color-*)` tokens — never raw hex.
@@ -204,12 +193,8 @@ and add `active:scale-[0.97]`.
    keep `hover:-translate-y-0.5`, and replace `active:translate-y-0` with
    `active:scale-[0.97]`.
 
-5. `src/components/cta-banner.tsx:37` and `:45` — replace `transition-all`
-   with `transition-colors transition-transform duration-150 ease-strong-out`
-   and add `active:scale-[0.97]`.
-
-6. Confirm no `transition-all` remains on these four files:
-   `grep -n "transition-all" src/components/ui/floating-dock.tsx src/components/hero.tsx src/components/cta-banner.tsx`
+5. Confirm no `transition-all` remains on these two files:
+   `grep -n "transition-all" src/components/ui/floating-dock.tsx src/components/hero.tsx`
    — expect no output.
 
    (`src/components/mission.tsx`, `src/components/stats.tsx`,
@@ -217,7 +202,7 @@ and add `active:scale-[0.97]`.
    `transition-all`, but those are separate plans — 004 covers the card
    hovers, 006 covers the carousel.)
 
-7. Confirm the desktop circle did **not** receive a CSS press class:
+6. Confirm the desktop circle did **not** receive a CSS press class:
    `grep -n "active:scale" src/components/ui/floating-dock.tsx`
    — expect exactly **two** matches: the `DockItemLink` wrapper and the
    mobile dock item. The mobile menu toggle is a third, so expect **three**
@@ -235,6 +220,8 @@ and add `active:scale-[0.97]`.
 - Do NOT touch `src/components/mission.tsx`, `src/components/stats.tsx`,
   `src/components/faq-page.tsx`, `src/components/ui/carousel.tsx`, or
   `src/components/ui/3d-marquee.tsx`.
+- Do NOT re-add `src/components/cta-banner.tsx`. It was removed from the
+  home page; this plan does not cover it.
 - Do NOT add dependencies.
 - If a step doesn't match the code you find (drift since the commit stamp),
   match on the **code**, not the line number; if the code itself differs
@@ -244,10 +231,10 @@ and add `active:scale-[0.97]`.
 
 - **Mechanical**:
   - `npx tsc --noEmit` — expect no errors.
-  - `npx eslint src/components/ui/floating-dock.tsx src/components/hero.tsx src/components/cta-banner.tsx`
+  - `npx eslint src/components/ui/floating-dock.tsx src/components/hero.tsx`
     — expect no errors.
   - `npm run build` — expect "Compiled successfully".
-  - `grep -n "transition-all" src/components/ui/floating-dock.tsx src/components/hero.tsx src/components/cta-banner.tsx`
+  - `grep -n "transition-all" src/components/ui/floating-dock.tsx src/components/hero.tsx`
     — expect no output.
 
 - **Feel check**: run `npm run dev` and open the site.
@@ -256,8 +243,8 @@ and add `active:scale-[0.97]`.
   - Hover a desktop dock icon and press it at the same time — the icon
     magnifies *and* the whole button shrinks; both motions must be visible
     and neither must cancel the other.
-  - Press and hold "Explore Cohorts" and "Community Events" in the hero, and
-    both CTA-banner buttons — same behaviour.
+  - Press and hold "Explore Cohorts" and "Community Events" in the hero —
+    same behaviour.
   - The hero buttons must no longer *drop back down* when pressed; they scale
     down instead.
   - Confirm the button's colour still changes on hover as before, and that
@@ -270,7 +257,7 @@ and add `active:scale-[0.97]`.
     the press feedback still fires (it is `:active`, not hover-gated) and no
     stuck hover state remains.
 
-- **Done when**: all seven controls shrink on press, no `transition-all`
+- **Done when**: all five controls shrink on press, no `transition-all`
   remains in the three files, the desktop circle carries no CSS transform
   class, and typecheck, lint, and build pass.
 

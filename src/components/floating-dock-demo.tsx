@@ -35,6 +35,7 @@ export default function FloatingDockDemo() {
     {
       title: "Leaderboard",
       icon: <IconTrophy className="h-full w-full" />,
+      href: "/leaderboard",
     },
     {
       title: "FAQs",
