@@ -19,8 +19,8 @@ two systems, and only one of them respects reduced motion.
 - **~40 CSS-driven motions** handle it not at all. The transforms that matter
   most are the nine hover lifts and scales:
 
-  - `src/components/hero.tsx:63` — `hover:-translate-y-0.5`
-  - `src/components/hero.tsx:71` — `hover:-translate-y-0.5`
+  - `src/components/hero.tsx:64` — `hover:-translate-y-0.5`
+  - `src/components/hero.tsx:72` — `hover:-translate-y-0.5`
   - `src/components/ui/floating-dock.tsx:85` — `hover:scale-105`
   - `src/components/stats.tsx:98` — `hover:-translate-y-1` (removed by plan 004)
   - `src/components/mission.tsx:95` — `hover:-translate-y-1` (removed by plan 004)
@@ -94,7 +94,7 @@ Add to the `:root` block, after the existing `--accent-muted` declaration
 ```
 
 Then register them with Tailwind. Add to the existing `@theme inline` block
-(`src/app/globals.css:36-56`):
+(`src/app/globals.css:36-60`):
 
 ```css
   --ease-strong-out: var(--ease-strong-out);
@@ -124,7 +124,7 @@ compiles to
 ### 2. Reduced-motion reset
 
 Append to `src/app/globals.css`, at the end of the file (after the
-leaderboard rules, which end at line 149):
+leaderboard rules, which end at line 188):
 
 ```css
 /* Respect users who ask for less motion: keep colour and opacity feedback,
@@ -174,10 +174,10 @@ The new `src/components/ui/page-reveal.tsx` also uses
 
 - The palette is defined as CSS custom properties on `:root` in
   `src/app/globals.css:3-34`, and mirrored into Tailwind via the
-  `@theme inline` block at `src/app/globals.css:36-56`. Motion tokens belong
+  `@theme inline` block at `src/app/globals.css:36-60`. Motion tokens belong
   in the same two places, in that order.
 - Component-scoped CSS in this codebase lives at the bottom of
-  `src/app/globals.css` (see `.bg-subtle-grid` at lines 82-87).
+  `src/app/globals.css` (see `.bg-subtle-grid` at lines 86-91).
 - Motion components read `useReducedMotion()` from `"motion/react"` —
   `src/app/template.tsx:3`.
 - The codebase convention for the strong ease-out is
@@ -196,7 +196,7 @@ The new `src/components/ui/page-reveal.tsx` also uses
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 ```
 
-2. In the `@theme inline` block (`src/app/globals.css:36-56`), add:
+2. In the `@theme inline` block (`src/app/globals.css:36-60`), add:
 
 ```css
   --ease-strong-out: var(--ease-strong-out);
@@ -205,7 +205,7 @@ The new `src/components/ui/page-reveal.tsx` also uses
 ```
 
 3. Append the reduced-motion reset at the end of
-   `src/app/globals.css` (after line 149):
+   `src/app/globals.css` (after line 188):
 
 ```css
 /* Respect users who ask for less motion: keep colour and opacity feedback,

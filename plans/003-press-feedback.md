@@ -37,13 +37,13 @@ It has a hover state and a tooltip, but no `:active` state.
 The landing page's two terminal conversion CTAs have the same gap — they scale
 on hover but never acknowledge the press:
 
-`src/components/hero.tsx:63` — current:
+`src/components/hero.tsx:64` — current:
 
 ```tsx
                 className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm text-[var(--color-emptiness)] bg-[var(--color-caviar)] hover:bg-[var(--color-iron-fixture)] shadow-md transition-all hover:-translate-y-0.5 active:translate-y-0"
 ```
 
-`src/components/hero.tsx:71` — current:
+`src/components/hero.tsx:72` — current:
 
 ```tsx
                 className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm text-[var(--color-caviar)] bg-[var(--color-night-white)] hover:bg-[var(--color-spotted-dove)]/40 border border-[var(--color-spotted-dove)] transition-all hover:-translate-y-0.5 active:translate-y-0"
@@ -148,7 +148,7 @@ three press utilities to the existing `transition-colors` class list:
         className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-caviar)] border border-[var(--color-caviar)] shadow-xl text-[var(--color-emptiness)] hover:scale-105 transition-transform duration-150 ease-strong-out active:scale-[0.97]"
 ```
 
-**`src/components/hero.tsx:63` and `:71`** — these already have
+**`src/components/hero.tsx:64` and `:72`** — these already have
 `active:translate-y-0`. Replace the hover-lift + active-drop pair with the
 press scale. Keep the colour change:
 
@@ -163,7 +163,7 @@ Tailwind emits both and they do not conflict.
 ## Repo conventions to follow
 
 - Palette is always referenced through `var(--color-*)` tokens — never raw hex.
-  See `src/components/hero.tsx:63`.
+  See `src/components/hero.tsx:64`.
 - The shared easing token `ease-strong-out` is registered by plan 005 in
   `src/app/globals.css`. Verified against the installed Tailwind 4.3.5: it
   compiles to `transition-timing-function: var(--ease-strong-out)`.
@@ -188,7 +188,7 @@ Tailwind emits both and they do not conflict.
    `transition-transform duration-150 ease-strong-out` and add
    `active:scale-[0.97]`.
 
-4. `src/components/hero.tsx:63` and `:71` — replace `transition-all` with
+4. `src/components/hero.tsx:64` and `:72` — replace `transition-all` with
    `transition-colors transition-transform duration-150 ease-strong-out`,
    keep `hover:-translate-y-0.5`, and replace `active:translate-y-0` with
    `active:scale-[0.97]`.
