@@ -808,7 +808,11 @@ function buildMentorProfile(input: ProfileInput): AiProfile {
   return {
     avatarSeed: `${input.id}:${input.name}`,
     archetype,
-    headline: `${mentees.length} ${mentees.length === 1 ? "mentee" : "mentees"} and ${input.resources.length} pieces of work`,
+    headline: `${mentees.length} ${
+      mentees.length === 1 ? "mentee" : "mentees"
+    } and ${input.resources.length} ${
+      input.resources.length === 1 ? "piece" : "pieces"
+    } of work`,
     summary,
     badges,
     highlights,
