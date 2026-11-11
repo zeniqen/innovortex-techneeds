@@ -5,6 +5,9 @@ import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Counter } from "@/components/ui/animated-counter";
 
+/** Fired on the document once the splash has fully faded out. */
+export const SPLASH_DONE_EVENT = "techneeds:splash-done";
+
 /** How long the count itself runs, in seconds. */
 const COUNT_DURATION = 1.2;
 /** How long the overlay takes to fade out. */
@@ -68,6 +71,12 @@ export function LoadingScreen() {
 
   const handleExitComplete = useCallback(() => {
     document.body.style.overflow = previousOverflow.current ?? "";
+
+    // Tell the page that the splash is out of the way, so any entrance
+    // animation on the page can start where the visitor can actually see
+    // it rather than being spent behind this overlay.
+    document.documentElement.dataset.splashDone = "true";
+    document.dispatchEvent(new Event(SPLASH_DONE_EVENT));
   }, []);
 
   const handleComplete = useCallback(() => {
@@ -108,6 +117,7 @@ export function LoadingScreen() {
               src="/assets/logo.png"
               alt="TechNeeds IGDTUW"
               fill
+              sizes="64px"
               className="object-contain p-0.5"
               priority
             />

@@ -5,11 +5,15 @@ import Image from "next/image";
 import {
   IconPhoto,
 } from "@tabler/icons-react";
+import { GridBackground } from "@/components/ui/grid-background";
 
 export default function Glimpse() {
   return (
-    <section id="glimpse" className="py-24 relative bg-[var(--color-night-white)]/30 border-t border-[var(--color-night-white)]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="glimpse" className="py-24 relative overflow-hidden bg-[var(--color-night-white)]/30 border-t border-[var(--color-night-white)]">
+      {/* Faded grid backdrop */}
+      <GridBackground />
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--color-night-white)] text-[var(--color-caviar)] border border-[var(--color-spotted-dove)]">

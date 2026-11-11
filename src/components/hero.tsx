@@ -1,8 +1,27 @@
 import { IconArrowRight, IconRocket } from "@tabler/icons-react";
+import { EncryptedText } from "@/components/ui/encrypted-text";
+import { SplashGate } from "@/components/ui/splash-gate";
+import { WavyBackground } from "@/components/ui/wavy-background";
 
 export default function Hero() {
   return (
     <section id="home" className="relative pt-16 pb-20 md:pt-24 md:pb-28 overflow-hidden bg-[var(--color-emptiness)]">
+      {/* Wavy background layer */}
+      <WavyBackground
+        containerClassName="absolute inset-0 h-full w-full"
+        colors={[
+          "var(--color-night-white)",
+          "var(--color-spotted-dove)",
+          "var(--color-night-white)",
+          "var(--color-spotted-dove)",
+          "var(--color-night-white)",
+        ]}
+        backgroundFill="transparent"
+        waveOpacity={0.3}
+        blur={18}
+        waveWidth={50}
+      />
+
       {/* Subtle grid background */}
       <div className="absolute inset-0 bg-subtle-grid opacity-60 pointer-events-none -z-10" />
 
@@ -19,10 +38,14 @@ export default function Hero() {
           {/* Main Headline */}
           <div className="space-y-2">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[var(--color-caviar)] leading-[1.15]">
-              Upgrade Yourself! <br />
-              <span className="text-[var(--color-stone-haze)]">
-                Innovate. Code. Conquer.
-              </span>
+              {/* The headline encrypts itself once the splash has cleared. */}
+              <SplashGate fallback={<span>Upgrade Yourself!</span>}>
+                <EncryptedText
+                  text="Upgrade Yourself!"
+                  encryptedClassName="text-[var(--color-stone-haze)]"
+                  revealedClassName="text-[var(--color-caviar)]"
+                />
+              </SplashGate>
             </h1>
           </div>
 

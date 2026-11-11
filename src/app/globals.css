@@ -53,6 +53,9 @@
   --color-amber: var(--color-amber);
   --color-gain: var(--color-gain);
   --color-loss: var(--color-loss);
+
+  /* Animation used by the aurora background. */
+  --animate-aurora: aurora 8s linear infinite;
 }
 
 body {
@@ -86,8 +89,17 @@ body {
     linear-gradient(to bottom, rgba(192, 191, 189, 0.25) 1px, transparent 1px);
 }
 
-/* --- Leaderboard --- */
+/* The drifting gradient behind the aurora background. */
+@keyframes aurora {
+  0% {
+    background-position: 50% 50%, 50% 50%;
+  }
+  100% {
+    background-position: 0% 100%, 100% 0%;
+  }
+}
 
+/* --- Leaderboard --- */
 /* The purple band behind the leaderboard header and podium. */
 .bg-plum-band {
   background-color: var(--color-plum-deep);

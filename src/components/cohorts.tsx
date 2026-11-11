@@ -5,11 +5,17 @@ import {
   IconSchool,
 } from "@tabler/icons-react";
 import CarouselDemo from "@/components/carousel-demo";
+import { AuroraBackground } from "@/components/ui/aurora-background";
 
 export default function Cohorts() {
   return (
-    <section id="cohorts" className="py-24 relative bg-[var(--color-emptiness)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="cohorts" className="py-24 relative overflow-hidden bg-[var(--color-emptiness)]">
+      {/* Aurora backdrop */}
+      <AuroraBackground
+        className="absolute inset-0 h-full w-full bg-transparent"
+      />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--color-night-white)] text-[var(--color-caviar)] border border-[var(--color-spotted-dove)]">
