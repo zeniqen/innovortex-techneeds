@@ -54,9 +54,52 @@
   --color-gain: var(--color-gain);
   --color-loss: var(--color-loss);
 
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-card: var(--color-card);
+  --color-card-foreground: var(--color-card-foreground);
+  --color-popover: var(--color-popover);
+  --color-popover-foreground: var(--color-popover-foreground);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-border: var(--color-border);
+  --color-input: var(--color-input);
+  --color-ring: var(--color-ring);
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-chart-1: var(--color-chart-1);
+  --color-chart-2: var(--color-chart-2);
+  --color-chart-3: var(--color-chart-3);
+  --color-chart-4: var(--color-chart-4);
+  --color-chart-5: var(--color-chart-5);
+
   /* Animation used by the aurora background. */
   --animate-aurora: aurora 8s linear infinite;
   --animate-cell-ripple: cell-ripple var(--duration, 600ms) ease-out var(--delay, 0ms);
+
+  /* shadcn-style semantic tokens, mapped onto the palette above so that
+     components written against the shadcn convention render in the site's
+     own colours rather than in hard-coded defaults. */
+  --color-background: var(--color-emptiness);
+  --color-foreground: var(--color-caviar);
+  --color-card: var(--color-emptiness);
+  --color-card-foreground: var(--color-caviar);
+  --color-popover: var(--color-emptiness);
+  --color-popover-foreground: var(--color-caviar);
+  --color-muted: var(--color-night-white);
+  --color-muted-foreground: var(--color-iron-fixture);
+  --color-border: var(--color-spotted-dove);
+  --color-input: var(--color-spotted-dove);
+  --color-ring: var(--color-caviar);
+  --color-primary: var(--color-caviar);
+  --color-primary-foreground: var(--color-emptiness);
+
+  /* Ribbon tones for the team lanyards. */
+  --color-chart-1: #3f1d95;
+  --color-chart-2: #6d28d9;
+  --color-chart-3: #95898b;
+  --color-chart-4: #5f5b5d;
+  --color-chart-5: #c0bfbd;
 }
 
 body {

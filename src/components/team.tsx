@@ -1,20 +1,29 @@
 "use client";
 
-import Image from "next/image";
-import {
-  IconBrandLinkedin,
-  IconBrandInstagram,
-  IconBrandX,
-  IconUsersGroup,
-} from "@tabler/icons-react";
+import { IconUsersGroup } from "@tabler/icons-react";
 import { PageReveal } from "@/components/ui/page-reveal";
-import { TEAM_GROUPS, type TeamMember } from "@/lib/team-data";
+import {
+  TeamLanyardRail,
+  type LanyardLink,
+  type LanyardMember,
+} from "@/components/ui/team-lanyard-rail";
+import { TEAM_GROUPS } from "@/lib/team-data";
 
-const SOCIAL_ICONS = {
-  linkedin: IconBrandLinkedin,
-  instagram: IconBrandInstagram,
-  x: IconBrandX,
-} as const;
+function linksFor(member: (typeof TEAM_GROUPS)[number]["members"][number]) {
+  const links: LanyardLink[] = [];
+
+  if (member.links.linkedin) {
+    links.push({ label: "LinkedIn", href: member.links.linkedin });
+  }
+  if (member.links.instagram) {
+    links.push({ label: "Instagram", href: member.links.instagram });
+  }
+  if (member.links.x) {
+    links.push({ label: "X", href: member.links.x });
+  }
+
+  return links;
+}
 
 export default function Team() {
   return (
@@ -35,79 +44,34 @@ export default function Team() {
               who wanted the next generation to start further ahead.
             </p>
           </div>
-
-          {/* Team groups */}
-          {TEAM_GROUPS.map((group) => (
-            <div key={group.role} className="mb-16 last:mb-0">
-              <div className="flex items-center justify-center gap-3 mb-10">
-                <span className="h-px w-8 bg-[var(--color-spotted-dove)]" />
-                <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[var(--color-plum)]">
-                  {group.role}
-                </h2>
-                <span className="h-px w-8 bg-[var(--color-spotted-dove)]" />
-              </div>
-
-              {/* The row gap has to clear the portraits, which overhang the
-                  top of their card. */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-14 sm:gap-x-6">
-                {group.members.map((member) => (
-                  <MemberCard key={`${group.role}-${member.name}`} member={member} />
-                ))}
-              </div>
-            </div>
-          ))}
         </PageReveal>
+
+        {/* One lanyard rail per group of the society */}
+        {TEAM_GROUPS.map((group) => {
+          const items: LanyardMember[] = group.members.map((member, index) => ({
+            id: `${group.role}-${member.name}-${index}`,
+            name: member.name,
+            role: member.position,
+            team: group.role,
+            image: member.avatar,
+            links: linksFor(member),
+            tone: ((index % 5) + 1) as 1 | 2 | 3 | 4 | 5,
+          }));
+
+          return (
+            <TeamLanyardRail
+              key={group.role}
+              items={items}
+              eyebrow={`${group.members.length} ${
+                group.members.length === 1 ? "member" : "members"
+              }`}
+              heading={group.role}
+              caption="Click a badge to turn it over, or drag one along the rail."
+              className="mb-16 last:mb-0"
+            />
+          );
+        })}
       </div>
     </section>
-  );
-}
-
-function MemberCard({ member }: { member: TeamMember }) {
-  const socials = Object.entries(member.links).filter(
-    (entry): entry is [keyof typeof SOCIAL_ICONS, string] => Boolean(entry[1]),
-  );
-
-  return (
-    <div className="group relative flex flex-col items-center rounded-2xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] px-5 pb-6 pt-16 text-center shadow-sm transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1 hover:shadow-md">
-      {/* Portrait, overlapping the top of the card */}
-      <div className="absolute -top-12 left-1/2 -translate-x-1/2">
-        <Image
-          src={member.avatar}
-          alt={`${member.name}, ${member.position}`}
-          width={200}
-          height={200}
-          sizes="(max-width: 640px) 40vw, (max-width: 1024px) 30vw, 200px"
-          className="size-24 sm:size-28 rounded-full border-4 border-[var(--color-emptiness)] object-cover shadow-sm"
-        />
-      </div>
-
-      <h3 className="text-sm sm:text-base font-bold text-[var(--color-caviar)]">
-        {member.name}
-      </h3>
-      <p className="mt-1 text-xs font-semibold text-[var(--color-iron-fixture)]">
-        {member.position}
-      </p>
-
-      {socials.length > 0 && (
-        <div className="mt-4 flex items-center gap-2">
-          {socials.map(([network, href]) => {
-            const Icon = SOCIAL_ICONS[network];
-
-            return (
-              <a
-                key={network}
-                href={href}
-                target="_blank"
-                rel="noreferrer noopener"
-                aria-label={`${member.name} on ${network}`}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-night-white)] text-[var(--color-iron-fixture)] transition-colors duration-150 hover:bg-[var(--color-plum)] hover:text-[var(--color-emptiness)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-plum)]"
-              >
-                <Icon className="w-4 h-4" />
-              </a>
-            );
-          })}
-        </div>
-      )}
-    </div>
   );
 }
