@@ -463,22 +463,60 @@ function Hole() {
   );
 }
 
-function Finish() {
+/**
+ * Handles for the handful of leaf elements the physics loop writes to every
+ * frame of every badge.
+ *
+ * They used to be inherited custom properties (`--shade`, `--gx`, `--drawn`)
+ * set on the flip container. A custom property is inherited, so changing one
+ * invalidates the style of the entire badge subtree - tens of nodes - on
+ * every frame. Writing `opacity` and `transform` straight onto the two
+ * elements that actually use them keeps the recalc to those elements alone.
+ */
+type FinishHandles = {
+  /** black overlay that darkens as the card turns away from the viewer */
+  shade: HTMLSpanElement | null;
+  /** gloss band that slides across the card as it turns */
+  gx: HTMLSpanElement | null;
+  /** in-card links, hidden while the interactive overlay is showing */
+  drawn: HTMLSpanElement | null;
+};
+
+type BadgeFinishHandles = {
+  front: FinishHandles;
+  back: FinishHandles;
+};
+
+function Finish({ handles }: { handles: FinishHandles }) {
+  const gxRef = React.useCallback(
+    (node: HTMLSpanElement | null) => {
+      handles.gx = node;
+    },
+    [handles],
+  );
+  const shadeRef = React.useCallback(
+    (node: HTMLSpanElement | null) => {
+      handles.shade = node;
+    },
+    [handles],
+  );
   return (
     <>
       <span
+        ref={gxRef}
         aria-hidden="true"
         className="pointer-events-none absolute inset-y-0 -left-1/2 block w-[200%] opacity-70"
         style={{
           background:
             "linear-gradient(100deg, transparent 40%, color-mix(in oklab, white 26%, transparent) 48%, color-mix(in oklab, white 8%, transparent) 52%, transparent 58%)",
-          transform: "translateX(var(--gx, 0%))",
+          transform: "translateX(0%)",
         }}
       />
       <span
+        ref={shadeRef}
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 block bg-black"
-        style={{ opacity: "var(--shade, 0)" }}
+        style={{ opacity: 0 }}
       />
     </>
   );
@@ -500,9 +538,11 @@ function Silhouette() {
 const BadgeFaces = React.memo(function BadgeFaces({
   item,
   tone,
+  handles,
 }: {
   item: LanyardMember;
   tone: string;
+  handles: BadgeFinishHandles;
 }) {
   const seed = React.useMemo(() => hash(`${item.id}:${item.name}`), [
     item.id,
@@ -512,6 +552,12 @@ const BadgeFaces = React.memo(function BadgeFaces({
   const bars = React.useMemo(() => barcode(seed), [seed]);
   const digits = String(seed % 1000000000).padStart(9, "0");
   const [failed, setFailed] = React.useState(false);
+  const drawnRef = React.useCallback(
+    (node: HTMLSpanElement | null) => {
+      handles.back.drawn = node;
+    },
+    [handles],
+  );
   const tags = (item.tags ?? []).slice(0, 3);
   const links = (item.links ?? []).slice(0, 3);
   return (
@@ -538,6 +584,7 @@ const BadgeFaces = React.memo(function BadgeFaces({
                 alt=""
                 draggable={false}
                 decoding="async"
+                loading="lazy"
                 onError={() => setFailed(true)}
                 className="pointer-events-none absolute inset-0 block size-full select-none object-cover"
               />
@@ -568,7 +615,7 @@ const BadgeFaces = React.memo(function BadgeFaces({
             {digits}
           </span>
         </span>
-        <Finish />
+        <Finish handles={handles.front} />
       </span>
       <span
         data-face="back"
@@ -609,9 +656,10 @@ const BadgeFaces = React.memo(function BadgeFaces({
         )}
         {links.length > 0 && (
           <span
+            ref={drawnRef}
             aria-hidden="true"
             className="absolute bottom-[0.75em] left-[0.6em] flex flex-col items-start gap-[0.1em] transition-opacity duration-150 motion-reduce:transition-none"
-            style={{ opacity: "var(--drawn, 1)" }}
+            style={{ opacity: 1 }}
           >
             {links.map((link) => (
               <span key={link.label} className={LINK_ROW}>
@@ -628,7 +676,7 @@ const BadgeFaces = React.memo(function BadgeFaces({
         >
           <path d={qr} fill="currentColor" />
         </svg>
-        <Finish />
+        <Finish handles={handles.back} />
       </span>
       {[0, 1].map((side) => (
         <span
@@ -668,13 +716,22 @@ export function TeamLanyardRail({
   const stageRef = React.useRef(null as HTMLDivElement | null);
   const slots = React.useRef([] as (HTMLDivElement | null)[]);
   const swings = React.useRef([] as (HTMLSpanElement | null)[]);
-  const straps = React.useRef([] as (HTMLSpanElement | null)[]);
   const cords = React.useRef([] as (HTMLSpanElement | null)[]);
   const hangs = React.useRef([] as (HTMLSpanElement | null)[]);
   const buttons = React.useRef([] as (HTMLButtonElement | null)[]);
   const flips = React.useRef([] as (HTMLSpanElement | null)[]);
   const shadows = React.useRef([] as (HTMLSpanElement | null)[]);
   const linkLayers = React.useRef([] as (HTMLDivElement | null)[]);
+  // Leaf elements the physics loop writes to each frame. Stable per badge so
+  // the memoised badge faces never re-render because of them.
+  const finishHandles = React.useMemo(
+    () =>
+      Array.from({ length: count }, () => ({
+        front: { shade: null, gx: null, drawn: null } as FinishHandles,
+        back: { shade: null, gx: null, drawn: null } as FinishHandles,
+      })),
+    [count],
+  );
   const sim = React.useRef(emptySim());
   const [size, setSize] = React.useState({
     width: 0,
@@ -729,6 +786,8 @@ export function TeamLanyardRail({
     cyclic: false,
     activeControlled: false,
     flippedControlled: false,
+    visible: true,
+    finish: finishHandles,
   });
   live.current = {
     ...live.current,
@@ -740,6 +799,7 @@ export function TeamLanyardRail({
     count,
     activeControlled: activeProp !== undefined,
     flippedControlled: flippedProp !== undefined,
+    finish: finishHandles,
   };
   const callbacks = React.useRef({ onActiveChange, onFlippedChange });
   callbacks.current = { onActiveChange, onFlippedChange };
@@ -819,7 +879,6 @@ export function TeamLanyardRail({
     const swing = swings.current[i];
     if (swing) swing.style.transform = `rotate(${sw.toFixed(3)}deg)`;
     const st = s.st[i] ?? 0;
-    straps.current[i]?.style.setProperty("--stretch", `${st.toFixed(2)}px`);
     const cord = cords.current[i];
     if (cord)
       cord.style.transform = `scaleY(${Math.max(
@@ -837,17 +896,25 @@ export function TeamLanyardRail({
       )}deg) scale(${(1 + 0.08 * pop).toFixed(4)})`;
     const ry = s.ry[i] ?? 0;
     const flip = flips.current[i];
-    const facing = Math.abs(Math.cos((ry * Math.PI) / 180));
+    const cos = Math.cos((ry * Math.PI) / 180);
+    const facing = Math.abs(cos);
     if (flip) {
       flip.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${ry.toFixed(
         2,
       )}deg)`;
-      flip.style.setProperty(
-        "--shade",
-        ((1 - facing) * 0.45).toFixed(3),
-      );
+      // The gloss and the shade used to be inherited custom properties set
+      // on this container, which invalidated the style of the whole badge
+      // subtree on every frame. Write them onto the two leaf elements that
+      // use them instead, and only onto the face that is actually visible.
       const phi = ((((ry + 90) % 180) + 180) % 180) - 90;
-      flip.style.setProperty("--gx", `${(phi * 0.9).toFixed(1)}%`);
+      const face = live.current.finish[i];
+      if (face) {
+        const visible = cos >= 0 ? face.front : face.back;
+        const gx = visible.gx;
+        if (gx) gx.style.transform = `translateX(${(phi * 0.9).toFixed(1)}%)`;
+        const shade = visible.shade;
+        if (shade) shade.style.opacity = ((1 - facing) * 0.45).toFixed(3);
+      }
     }
     const shadow = shadows.current[i];
     if (shadow) {
@@ -868,13 +935,20 @@ export function TeamLanyardRail({
       layer.style.opacity = on ? "1" : "0";
       layer.style.visibility = on ? "visible" : "hidden";
     }
-    flip?.style.setProperty("--drawn", on ? "0" : "1");
+    // the in-card copy of the links yields to the interactive overlay
+    const drawn = live.current.finish[i]?.back.drawn;
+    if (drawn) drawn.style.opacity = on ? "0" : "1";
   }, []);
 
   const step = React.useCallback(
     (now: number) => {
       const s = sim.current;
       const L = live.current;
+      // Stop the loop the moment the rail leaves the viewport.
+      if (!L.visible) {
+        s.raf = 0;
+        return;
+      }
       const n = L.count;
       const g = L.geo;
       const { width, carousel } = L.size;
@@ -1023,9 +1097,9 @@ export function TeamLanyardRail({
           Math.abs(s.vlift[i] ?? 0) > 0.01 ||
           Math.abs((s.pop[i] ?? 0) - (s.tp[i] ?? 0)) > 0.002 ||
           Math.abs(s.vpop[i] ?? 0) > 0.01 ||
-          Math.abs(s.sw[i] ?? 0) > 0.02 ||
-          Math.abs(s.vsw[i] ?? 0) > 0.05 ||
-          Math.abs((s.beta[i] ?? 0) - (s.sw[i] ?? 0)) > 0.01 ||
+          Math.abs(s.sw[i] ?? 0) > 0.25 ||
+          Math.abs(s.vsw[i] ?? 0) > 0.4 ||
+          Math.abs((s.beta[i] ?? 0) - (s.sw[i] ?? 0)) > 0.2 ||
           Math.abs(s.st[i] ?? 0) > 0.05 ||
           Math.abs(s.vst[i] ?? 0) > 0.1
         )
@@ -1033,8 +1107,7 @@ export function TeamLanyardRail({
       }
       if (s.drag >= 0 || s.pull >= 0 || now < s.free) busy = true;
       if (busy) s.raf = requestAnimationFrame(step);
-      else {
-        s.raf = 0;
+      else {        s.raf = 0;
         s.last = 0;
         for (let i = 0; i < n; i++) {
           if (now > s.free) {
@@ -1093,6 +1166,14 @@ export function TeamLanyardRail({
       cancelAnimationFrame(s.raf);
       s.raf = 0;
       snap();
+      return;
+    }
+    // A rail that is off screen has nothing to show, so its simulation is
+    // pure waste: it would keep a requestAnimationFrame loop alive for the
+    // whole page and repaint badges nobody can see.
+    if (!live.current.visible) {
+      cancelAnimationFrame(s.raf);
+      s.raf = 0;
       return;
     }
     if (!s.raf) {
@@ -1198,6 +1279,31 @@ export function TeamLanyardRail({
   React.useEffect(() => {
     if (reduced) kick();
   }, [reduced, kick]);
+
+  /**
+   * Only simulate the rail while it is on screen.
+   *
+   * The physics loop never settles on its own - the collision pass keeps the
+   * badges a hair apart, so the "is anything still moving" check stays true
+   * for good. Left alone, every rail on the page holds a requestAnimationFrame
+   * loop open and repaints badges that are off screen, which is what turns
+   * nine rails into nine times the work.
+   */
+  React.useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        live.current.visible = entry.isIntersecting;
+        if (entry.isIntersecting) kick();
+      },
+      { rootMargin: "300px 0px" },
+    );
+    observer.observe(stage);
+
+    return () => observer.disconnect();
+  }, [kick]);
 
   const swayed = React.useRef(false);
   const ready = size.width > 0;
@@ -1723,13 +1829,9 @@ export function TeamLanyardRail({
                 style={{ transformOrigin: `${W / 2}px ${g.pivotY}px` }}
               >
                 <span
-                  ref={(node) => {
-                    straps.current[i] = node;
-                  }}
                   data-strap
                   aria-hidden="true"
                   className="absolute inset-0 block"
-                  style={{ ["--stretch" as string]: "0px" }}
                 >
                   <span
                     className="absolute block bg-black/15 blur-[2px]"
@@ -1905,7 +2007,11 @@ export function TeamLanyardRail({
                         transform: `perspective(${PERSPECTIVE}px) rotateY(${REST_Y[i % REST_Y.length] ?? 0}deg)`,
                       }}
                     >
-                      <BadgeFaces item={item} tone={tone} />
+                      <BadgeFaces
+                        item={item}
+                        tone={tone}
+                        handles={finishHandles[i]}
+                      />
                     </span>
                   </button>
                   <span
