@@ -77,6 +77,11 @@
   --animate-aurora: aurora 8s linear infinite;
   --animate-cell-ripple: cell-ripple var(--duration, 600ms) ease-out var(--delay, 0ms);
 
+  /* The accordion on the FAQ page opens and closes by animating its own
+     height, which is published by Radix as --radix-accordion-content-height. */
+  --animate-accordion-down: accordion-down 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-accordion-up: accordion-up 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+
   /* shadcn-style semantic tokens, mapped onto the palette above so that
      components written against the shadcn convention render in the site's
      own colours rather than in hard-coded defaults. */
@@ -156,6 +161,54 @@ body {
   }
   100% {
     background-position: 0% 100%, 100% 0%;
+  }
+}
+
+/* The FAQ answer reveal: each character resolves out of a blur.
+   The end state is `none` rather than `blur(0px)`: Lightning CSS, which
+   minifies the stylesheet, rewrites `blur(0px)` into `blur()`, which is not
+   a valid filter and leaves the character with no blur animation at all.
+   `none` is the same thing as an empty filter list, so the two still
+   interpolate. */
+@keyframes faq-reveal-letter {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+.faq-reveal-letter {
+  animation: faq-reveal-letter 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-reveal-letter {
+    animation: none;
+    opacity: 1;
+    filter: none;
+  }
+}
+
+/* The FAQ accordion opening and closing. */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
   }
 }
 
