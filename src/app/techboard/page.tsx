@@ -32,7 +32,7 @@ export const instant = false;
 export default function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ program?: string }>;
+  searchParams: Promise<{ program?: string; mentor?: string }>;
 }) {
   return (
     <div className="relative flex min-h-screen flex-col bg-[var(--color-emptiness)] text-[var(--color-caviar)] selection:bg-[var(--color-caviar)] selection:text-[var(--color-emptiness)]">
@@ -54,10 +54,10 @@ export default function Page({
 async function TechboardBody({
   searchParams,
 }: {
-  searchParams: Promise<{ program?: string }>;
+  searchParams: Promise<{ program?: string; mentor?: string }>;
 }) {
   const user = await optionalUser();
-  const { program } = await searchParams;
+  const { program, mentor } = await searchParams;
 
   if (!user) {
     return <Techboard />;
@@ -71,5 +71,5 @@ async function TechboardBody({
     return <MentorPanel user={user} programId={program} />;
   }
 
-  return <AdminPanel user={user} programId={program} />;
+  return <AdminPanel user={user} programId={program} mentorId={mentor} />;
 }

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
-import { IconAlertCircle, IconLoader2 } from "@tabler/icons-react";
+import { IconAlertCircle, IconLoader2, IconTrash } from "@tabler/icons-react";
 
 import { cn } from "@/lib/utils";
 /**
@@ -204,6 +204,100 @@ export function RemoveButton({
       {busy ? <IconLoader2 className="h-3.5 w-3.5 animate-spin" /> : icon}
       {label}
     </button>
+  );
+}
+
+/**
+ * A button that removes something, and asks first.
+ *
+ * Deleting a program takes the mentees on it with it, so it is worth a
+ * second press. The first press arms the button and the second one does
+ * it; anything else cancels it.
+ */
+export function DangerButton({
+  action,
+  label,
+  question,
+  title,
+}: {
+  action: string;
+  /** What the button says before it is armed. */
+  label: string;
+  /** What it asks when it is armed. */
+  question: string;
+  title?: string;
+}) {
+  const router = useRouter();
+  const [asking, setAsking] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const remove = async () => {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+
+    try {
+      const response = await fetch(action, { method: "DELETE" });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        setError(payload?.error ?? "That could not be removed.");
+        setBusy(false);
+        return;
+      }
+      router.refresh();
+    } catch {
+      setError("Could not reach the platform.");
+    }
+
+    setBusy(false);
+    setAsking(false);
+  };
+
+  if (!asking) {
+    return (
+      <button
+        type="button"
+        onClick={() => setAsking(true)}
+        title={title}
+        className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-spotted-dove)] px-2.5 py-1.5 text-[0.7rem] font-bold text-[var(--color-iron-fixture)] transition-colors duration-150 hover:border-[var(--color-loss)] hover:text-[var(--color-loss)]"
+      >
+        {label}
+      </button>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <button
+        type="button"
+        disabled={busy}
+        onClick={remove}
+        title={title}
+        className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-loss)] px-2.5 py-1.5 text-[0.7rem] font-bold text-white transition-colors duration-150 hover:bg-[var(--color-loss)]/90 disabled:opacity-60"
+      >
+        {busy ? (
+          <IconLoader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <IconTrash className="h-3.5 w-3.5" />
+        )}
+        {question}
+      </button>
+      <button
+        type="button"
+        onClick={() => setAsking(false)}
+        className="rounded-lg border border-[var(--color-spotted-dove)] px-2.5 py-1.5 text-[0.7rem] font-bold text-[var(--color-iron-fixture)] transition-colors duration-150 hover:bg-[var(--color-night-white)]"
+      >
+        Cancel
+      </button>
+      {error && (
+        <span role="alert" className="text-[0.7rem] font-semibold text-[var(--color-loss)]">
+          {error}
+        </span>
+      )}
+    </span>
   );
 }
 

@@ -3,9 +3,14 @@
 import { useState } from "react";
 import { IconTrash } from "@tabler/icons-react";
 
-import { ActionForm, RemoveButton, type FieldSpec } from "./action-form";
+import { ActionForm, DangerButton, RemoveButton, type FieldSpec } from "./action-form";
 import { CredentialCard } from "./credential-card";
 import type { Mentor } from "@/lib/platform/types";
+
+/**
+ * A program, as far as the assignment controls need to know about it.
+ */
+export type ProgramOption = { id: string; name: string };
 
 /**
  * The admin panel's writes.
@@ -256,5 +261,110 @@ export function AddAdminForm() {
         />
       )}
     </div>
+  );
+}
+
+/**
+ * Puts a mentor on a program.
+ *
+ * The other way round from putting a mentor on a program, and the same
+ * thing underneath: an admin thinks about it both ways.
+ */
+export function AssignProgramForm({
+  mentorId,
+  programs,
+}: {
+  mentorId: string;
+  programs: ProgramOption[];
+}) {
+  if (programs.length === 0) {
+    return (
+      <p className="text-xs text-[var(--color-iron-fixture)]">
+        This mentor is on every program already.
+      </p>
+    );
+  }
+
+  const fields: FieldSpec[] = [
+    {
+      name: "programId",
+      label: "Program",
+      type: "select",
+      required: true,
+      options: programs.map((program) => ({
+        value: program.id,
+        label: program.name,
+      })),
+    },
+  ];
+
+  return (
+    <ActionForm
+      action={`/api/platform/admin/mentors/${mentorId}/programs`}
+      fields={fields}
+      submitLabel="Assign program"
+    />
+  );
+}
+
+/**
+ * Takes a mentor off a program.
+ */
+export function RemoveProgramButton({
+  mentorId,
+  programId,
+  programName,
+}: {
+  mentorId: string;
+  programId: string;
+  programName: string;
+}) {
+  return (
+    <RemoveButton
+      action={`/api/platform/admin/mentors/${mentorId}/programs/${programId}`}
+      label="Remove"
+      title={`Take ${programName} off this mentor`}
+      icon={<IconTrash className="h-3.5 w-3.5" />}
+    />
+  );
+}
+
+/**
+ * Removes a mentor from the platform.
+ */
+export function DeleteMentorButton({
+  mentorId,
+  name,
+}: {
+  mentorId: string;
+  name: string;
+}) {
+  return (
+    <DangerButton
+      action={`/api/platform/admin/mentors/${mentorId}`}
+      label="Delete"
+      question={`Delete ${name}?`}
+      title={`Remove ${name} from the platform`}
+    />
+  );
+}
+
+/**
+ * Removes a program and everything on it.
+ */
+export function DeleteProgramButton({
+  programId,
+  name,
+}: {
+  programId: string;
+  name: string;
+}) {
+  return (
+    <DangerButton
+      action={`/api/platform/admin/programs/${programId}`}
+      label="Delete program"
+      question={`Delete ${name}?`}
+      title={`Remove ${name} and everything on it`}
+    />
   );
 }

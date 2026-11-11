@@ -2,10 +2,14 @@ import Link from "next/link";
 
 import {
   AddAdminForm,
+  AssignProgramForm,
   AttachMentorForm,
   CreateProgramForm,
+  DeleteMentorButton,
+  DeleteProgramButton,
   OnboardMentorForm,
   RemoveMentorButton,
+  RemoveProgramButton,
 } from "@/components/platform/admin-actions";
 import {
   Chip,
@@ -35,13 +39,17 @@ import type { SessionUser } from "@/lib/platform/types";
 export async function AdminPanel({
   user,
   programId,
+  mentorId,
 }: {
   user: SessionUser;
   programId?: string;
+  mentorId?: string;
 }) {
   const programs = await listPrograms();
   const mentors = await listMentors();
   const selected = programs.find((program) => program.id === programId) ?? null;
+  const selectedMentor =
+    mentors.find((mentor) => mentor.id === mentorId) ?? null;
 
   const counts = await queryOne<{
     programs: number;
@@ -63,6 +71,14 @@ export async function AdminPanel({
   const availableMentors = mentors.filter(
     (mentor) => !selectedMentors.some((assigned) => assigned.id === mentor.id),
   );
+
+  // The programs this mentor is on, and the ones they are not.
+  const mentorPrograms = selectedMentor
+    ? programs.filter((program) => selectedMentor.programIds.includes(program.id))
+    : [];
+  const otherPrograms = selectedMentor
+    ? programs.filter((program) => !selectedMentor.programIds.includes(program.id))
+    : [];
 
   return (
     <PanelShell
@@ -109,6 +125,12 @@ export async function AdminPanel({
                       <Chip tone={program.status === "active" ? "good" : "neutral"}>
                         {program.status}
                       </Chip>
+                    }
+                    action={
+                      <DeleteProgramButton
+                        programId={program.id}
+                        name={program.name}
+                      />
                     }
                   />
                 ))}
@@ -163,6 +185,53 @@ export async function AdminPanel({
             </PanelCard>
           )}
 
+          {selectedMentor && (
+            <PanelCard
+              title={`Programs for ${selectedMentor.name}`}
+              description={`${mentorPrograms.length} of ${programs.length} programs. A mentor can run more than one.`}
+              action={
+                <Link
+                  href="/techboard"
+                  className="text-xs font-bold text-[var(--color-iron-fixture)] underline underline-offset-4 hover:text-[var(--color-caviar)]"
+                >
+                  Close
+                </Link>
+              }
+            >
+              {mentorPrograms.length === 0 ? (
+                <EmptyState
+                  title="Not on any program yet"
+                  description="Assign them one below."
+                />
+              ) : (
+                <ul>
+                  {mentorPrograms.map((program) => (
+                    <ListRow
+                      key={program.id}
+                      title={program.name}
+                      meta={program.track}
+                      action={
+                        <RemoveProgramButton
+                          mentorId={selectedMentor.id}
+                          programId={program.id}
+                          programName={program.name}
+                        />
+                      }
+                    />
+                  ))}
+                </ul>
+              )}
+
+              <div className="mt-6 border-t border-[var(--color-night-white)] pt-6">
+                <h3 className="mb-3 text-sm font-bold">Assign them a program</h3>
+                <AssignProgramForm
+                  mentorId={selectedMentor.id}
+                  programs={otherPrograms}
+                />
+              </div>
+            </PanelCard>
+          )}
+
           <PanelCard
             title="Create a program"
             description="A program is a cohort of mentees looked after by one or more mentors."
@@ -186,21 +255,39 @@ export async function AdminPanel({
             {mentors.length === 0 ? (
               <EmptyState title="No mentors yet" />
             ) : (
-              <ul className="max-h-80 overflow-y-auto">
-                {mentors.map((mentor) => (
-                  <ListRow
-                    key={mentor.id}
-                    title={mentor.name}
-                    meta={mentor.email}
-                    detail={
-                      <span className="text-[0.7rem] text-[var(--color-iron-fixture)]">
-                        {mentor.programIds.length} program
-                        {mentor.programIds.length === 1 ? "" : "s"}
-                      </span>
-                    }
-                  />
-                ))}
-              </ul>
+              <div className="relative">
+                <ul className="max-h-80 overflow-y-auto pr-1">
+                  {mentors.map((mentor) => (
+                    <ListRow
+                      key={mentor.id}
+                      title={
+                        <Link
+                          href={`/techboard?mentor=${mentor.id}`}
+                          className="underline-offset-4 hover:underline"
+                        >
+                          {mentor.name}
+                        </Link>
+                      }
+                      meta={mentor.email}
+                      detail={
+                        <span className="text-[0.7rem] text-[var(--color-iron-fixture)]">
+                          {mentor.programIds.length} program
+                          {mentor.programIds.length === 1 ? "" : "s"}
+                        </span>
+                      }
+                      action={
+                        <DeleteMentorButton
+                          mentorId={mentor.id}
+                          name={mentor.name}
+                        />
+                      }
+                    />
+                  ))}
+                </ul>
+                {/* The list is taller than the card, so the cut is faded
+                    rather than left as a half row. */}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[var(--color-emptiness)] to-transparent" />
+              </div>
             )}
           </PanelCard>
 

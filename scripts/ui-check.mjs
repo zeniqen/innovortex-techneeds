@@ -122,7 +122,7 @@ const signIn = async (b, role, identifier, password) => {
  * and presses it. The form is found by its button, because a page can have
  * more than one form with a field of the same name.
  */
-const submitForm = async (b, buttonText, values) =>
+const submitForm = async (b, buttonText, values, options = {}) =>
   b.ev(`(function(){
     const button = [...document.querySelectorAll('button[type=submit]')].find(b => b.textContent.trim().toLowerCase().includes(${JSON.stringify(buttonText.toLowerCase())}));
     if (!button) return { ok: false, why: 'no button matching ${buttonText}' };
@@ -143,6 +143,19 @@ const submitForm = async (b, buttonText, values) =>
       }
       field.dispatchEvent(new Event('input', { bubbles: true }));
       field.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // A form whose only field is a select can be submitted without picking
+    // by hand. A form with other fields filled in is left alone: picking
+    // there would send an id the person did not choose.
+    if (${JSON.stringify(Boolean(options.pickSelect))}) {
+      for (const field of form.querySelectorAll('select')) {
+        if (field.value) continue;
+        const option = [...field.options].find(o => o.value);
+        if (!option) continue;
+        field.value = option.value;
+        field.dispatchEvent(new Event('change', { bubbles: true }));
+      }
     }
 
     button.click();
@@ -406,6 +419,148 @@ console.log("\nTHE OLD PANEL ROUTES");
       `landed on ${where}`,
     );
   }
+
+  b.close();
+}
+
+// --- the admin can remove things and assign programs ----------------------
+
+console.log("\nADMIN: DELETING AND ASSIGNING");
+{
+  const b = await openBrowser();
+  await b.go(`${APP}/login`);
+  await signIn(b, "admin", "admin@techneeds.test", "admin-demo");
+  await b.go(`${APP}/techboard`);
+
+  // Make a program to delete.
+  const doomedProgram = `UI Test Doomed Program ${stamp}`;
+  await submitForm(b, "Create program", { name: doomedProgram });
+  await sleep(2500);
+  const madeProgram = await b.ev(
+    `document.body.textContent.includes(${JSON.stringify(doomedProgram)})`,
+  );
+
+  // Delete it: the first press arms the button, the second one does it.
+  const armed = await b.ev(`(function(){
+    const card = [...document.querySelectorAll('section')].find(s => {
+      const heading = s.querySelector('h2');
+      return heading && heading.textContent.trim() === 'Programs';
+    });
+    if (!card) return { ok: false, why: 'no programs card' };
+    const row = [...card.querySelectorAll('li')].find(li => li.textContent.includes(${JSON.stringify(doomedProgram)}));
+    if (!row) return { ok: false, why: 'no row for the program' };
+    const button = [...row.querySelectorAll('button')].find(b => b.textContent.trim() === 'Delete program');
+    if (!button) return { ok: false, why: 'no delete button' };
+    button.click();
+    return { ok: true };
+  })()`);
+  await sleep(500);
+  const confirmed = await b.ev(`(function(){
+    const button = [...document.querySelectorAll('button')].find(b => b.textContent.trim().startsWith('Delete UI Test Doomed Program'));
+    if (!button) return { ok: false, why: 'the button did not ask to confirm' };
+    button.click();
+    return { ok: true };
+  })()`);
+  await sleep(2500);
+  const gone = await b.ev(
+    `!document.body.textContent.includes(${JSON.stringify(doomedProgram)})`,
+  );
+  check(
+    "delete a program",
+    madeProgram && armed.ok && confirmed.ok && gone,
+    armed.why ?? confirmed.why ?? (gone ? "gone from the list" : "still listed"),
+  );
+
+  // Make a mentor to assign and delete.
+  const doomedMentor = `UI Test Doomed Mentor ${stamp}`;
+  await submitForm(b, "Onboard mentor", {
+    name: doomedMentor,
+    email: `ui.doomed.${stamp}@example.com`,
+  });
+  await sleep(2500);
+  const madeMentor = await b.ev(
+    `document.body.textContent.includes(${JSON.stringify(doomedMentor)})`,
+  );
+
+  // Open them, so their programs can be assigned.
+  const opened = await b.ev(`(function(){
+    const link = [...document.querySelectorAll('a')].find(a => a.textContent.trim() === ${JSON.stringify(doomedMentor)});
+    if (!link) return { ok: false, why: 'no link for the mentor' };
+    link.click();
+    return { ok: true };
+  })()`);
+  await sleep(2500);
+  const mentorPanel = await b.ev(
+    `document.body.textContent.includes("Assign them a program")`,
+  );
+
+  // Assign them a program.
+  const assigned = await submitForm(b, "Assign program", {}, { pickSelect: true });
+  await sleep(2500);
+  const nowOn = await b.ev(
+    `document.body.textContent.includes("Programs for") && document.body.textContent.includes("1 of")`,
+  );
+  check(
+    "assign a program to a mentor",
+    madeMentor && opened.ok && mentorPanel && assigned.ok && nowOn,
+    opened.why ?? (nowOn ? "on one program" : "not on a program"),
+  );
+
+  // Take them off it again. The button has to be the one in this mentor's
+  // own card: the page has other "Remove" buttons on it.
+  const removed = await b.ev(`(function(){
+    const card = [...document.querySelectorAll('section')].find(s => {
+      const heading = s.querySelector('h2');
+      return heading && heading.textContent.trim().startsWith('Programs for');
+    });
+    if (!card) return { ok: false, why: 'no card for the mentor' };
+    const button = [...card.querySelectorAll('button')].find(b => b.textContent.trim() === 'Remove');
+    if (!button) return { ok: false, why: 'no remove button in the card' };
+    button.click();
+    return { ok: true };
+  })()`);
+  await sleep(2500);
+  const offIt = await b.ev(
+    `document.body.textContent.includes("Not on any program yet")`,
+  );
+  check(
+    "take a program off a mentor",
+    removed.ok && offIt,
+    removed.why ?? (offIt ? "off every program" : "still on one"),
+  );
+
+  // Delete the mentor. The button has to be the one in the mentors list.
+  const armedMentor = await b.ev(`(function(){
+    const card = [...document.querySelectorAll('section')].find(s => {
+      const heading = s.querySelector('h2');
+      return heading && heading.textContent.trim() === 'Mentors';
+    });
+    if (!card) return { ok: false, why: 'no mentors card' };
+    const row = [...card.querySelectorAll('li')].find(li => li.textContent.includes(${JSON.stringify(doomedMentor)}));
+    if (!row) return { ok: false, why: 'no row for the mentor' };
+    const button = [...row.querySelectorAll('button')].find(b => b.textContent.trim() === 'Delete');
+    if (!button) return { ok: false, why: 'no delete button' };
+    button.click();
+    return { ok: true };
+  })()`);
+  await sleep(500);
+  const confirmedMentor = await b.ev(`(function(){
+    const button = [...document.querySelectorAll('button')].find(b => b.textContent.trim().startsWith('Delete UI Test Doomed Mentor'));
+    if (!button) return { ok: false, why: 'the button did not ask to confirm' };
+    button.click();
+    return { ok: true };
+  })()`);
+  await sleep(2500);
+  const mentorGone = await b.ev(
+    `!document.body.textContent.includes(${JSON.stringify(doomedMentor)})`,
+  );
+  check(
+    "delete a mentor",
+    armedMentor.ok && confirmedMentor.ok && mentorGone,
+    armedMentor.why ??
+      confirmedMentor.why ??
+      (mentorGone ? "gone from the list" : "still listed"),
+  );
 
   b.close();
 }

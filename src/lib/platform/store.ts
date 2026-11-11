@@ -271,6 +271,63 @@ export async function removeMentorFromProgram(
   );
 }
 
+/**
+ * Removes a mentor from the platform.
+ *
+ * The mentor goes. Their mentees do not: a mentee belongs to a program,
+ * not to the person who happened to be looking after it, so they stay on
+ * theirs and carry on.
+ *
+ * The resources they published stay too. They belong to the program, and
+ * the mentees still have to hand them in.
+ */
+export async function deleteMentor(id: string): Promise<boolean> {
+  const mentor = await getMentor(id);
+  if (!mentor) return false;
+
+  await writeBatch((run) => {
+    run(`DELETE FROM mentor_programs WHERE mentor_id = ?`, [id]);
+    run(`DELETE FROM mentors WHERE id = ?`, [id]);
+  });
+
+  return true;
+}
+
+/**
+ * Removes a program from the platform.
+ *
+ * Everything that hangs off it goes with it: the resources, the progress
+ * the mentees had on them, the submissions, and the links between the
+ * program and the people on it.
+ */
+export async function deleteProgram(id: string): Promise<boolean> {
+  const program = await getProgram(id);
+  if (!program) return false;
+
+  await writeBatch((run) => {
+    // The order matters: the score events are found through the resources,
+    // so they have to go before the resources do.
+    run(
+      `DELETE FROM score_events WHERE resource_id IN (SELECT id FROM resources WHERE program_id = ?)`,
+      [id],
+    );
+    run(
+      `DELETE FROM submissions WHERE resource_id IN (SELECT id FROM resources WHERE program_id = ?)`,
+      [id],
+    );
+    run(
+      `DELETE FROM progress WHERE resource_id IN (SELECT id FROM resources WHERE program_id = ?)`,
+      [id],
+    );
+    run(`DELETE FROM resources WHERE program_id = ?`, [id]);
+    run(`DELETE FROM mentor_programs WHERE program_id = ?`, [id]);
+    run(`DELETE FROM mentee_programs WHERE program_id = ?`, [id]);
+    run(`DELETE FROM programs WHERE id = ?`, [id]);
+  });
+
+  return true;
+}
+
 export async function listMentorsForProgram(
   programId: string,
 ): Promise<Mentor[]> {

@@ -67,6 +67,29 @@ Three things are changed on the way in, and all three are deliberate:
 
 The enrollment numbers are the live ones, so the copy is recognisable.
 
+## What an admin can do
+
+On the techboard, signed in as an admin:
+
+- **Create a program**, and give it a subject area so it can be matched
+  against what a mentee has done.
+- **Onboard a mentor.** The password is generated and shown once.
+- **Put a mentor on a program.** Open the program and put them on it, or
+  open the mentor and assign them a program. Both are the same thing, and
+  both are there because an admin thinks about it both ways: "this mentor
+  should run this program" and "this program needs a mentor". A mentor can
+  run more than one.
+- **Take a mentor off a program.** The mentor stays on the platform.
+- **Delete a mentor.** Their mentees do not go with them: a mentee belongs
+  to a program, not to the person who happened to be looking after it, so
+  they stay on theirs and carry on. The resources they published stay too.
+- **Delete a program.** Everything on it goes with it: the resources, the
+  progress the mentees had on them, the submissions, and the links
+  between the program and the people on it.
+- **Add another admin.**
+
+Deleting asks first: the button arms, and a second press does it.
+
 ## The database
 
 SQLite, through `@libsql/client`. The same database is a file on disk in
