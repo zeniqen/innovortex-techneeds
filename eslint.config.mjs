@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The backend is a plain Node service, written in CommonJS. It is not
+    // part of the Next.js app and is not linted with the app's rules.
+    "backend/**",
   ]),
 ]);
 

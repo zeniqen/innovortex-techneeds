@@ -50,7 +50,11 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
-  const token = await createSession(result.user.role, result.user.id);
+  const token = await createSession(
+    result.user.role,
+    result.user.id,
+    result.token,
+  );
   const store = await cookies();
   store.set(SESSION_COOKIE, token, sessionCookieOptions());
 

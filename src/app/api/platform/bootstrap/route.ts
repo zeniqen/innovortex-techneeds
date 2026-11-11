@@ -1,4 +1,8 @@
-import { createAdmin, programCount, resetPlatform } from "@/lib/platform/store";
+import {
+  programCount,
+  resetPlatform,
+} from "@/lib/platform/store";
+import { createAdmin, resetAdmins } from "@/lib/platform/admin-store";
 import { seedPlatform } from "@/lib/platform/seed";
 import { currentUser } from "@/lib/platform/session";
 import { generatePassword } from "@/lib/platform/credentials";
@@ -79,8 +83,10 @@ export async function POST(request: Request) {
     const report = await seedPlatform();
     return Response.json({ ok: true, report });
   } catch (error) {
-    // Leave nothing half made behind.
+    // Leave nothing half made behind, so the next attempt starts from the
+    // same place rather than colliding with an admin that already exists.
     await resetPlatform();
+    await resetAdmins();
 
     return Response.json(
       {

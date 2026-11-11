@@ -1,5 +1,11 @@
 import { apiMentee } from "@/lib/platform/guards";
-import { audit, getResource, submitResource } from "@/lib/platform/store";
+import {
+  getResource,
+  submitResource,
+} from "@/lib/platform/store";
+import {
+  audit,
+} from "@/lib/platform/admin-store";
 
 /**
  * Submitting work.

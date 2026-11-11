@@ -1,10 +1,12 @@
 import { apiMentor } from "@/lib/platform/guards";
 import {
-  audit,
   createMentee,
   getProgram,
   listMenteesForProgram,
 } from "@/lib/platform/store";
+import {
+  audit,
+} from "@/lib/platform/admin-store";
 
 /**
  * The mentees on a mentor's program.

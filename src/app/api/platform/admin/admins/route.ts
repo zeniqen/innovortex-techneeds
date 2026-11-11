@@ -1,5 +1,8 @@
 import { apiUser } from "@/lib/platform/guards";
-import { audit, createAdmin } from "@/lib/platform/store";
+import {
+  audit,
+  createAdmin,
+} from "@/lib/platform/admin-store";
 import { generatePassword } from "@/lib/platform/credentials";
 
 /**

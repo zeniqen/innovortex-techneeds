@@ -1,5 +1,10 @@
 import { apiUser } from "@/lib/platform/guards";
-import { audit, createMentor } from "@/lib/platform/store";
+import {
+  createMentor,
+} from "@/lib/platform/store";
+import {
+  audit,
+} from "@/lib/platform/admin-store";
 
 /**
  * Onboarding a mentor.

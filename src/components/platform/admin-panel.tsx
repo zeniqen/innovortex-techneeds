@@ -26,8 +26,10 @@ import {
   listMentorsForProgram,
   listPrograms,
   listResources,
-  recentAudit,
 } from "@/lib/platform/store";
+import {
+  recentAudit,
+} from "@/lib/platform/admin-store";
 import type { SessionUser } from "@/lib/platform/types";
 
 /**

@@ -114,6 +114,22 @@ async function openBrowser() {
   };
 }
 
+/**
+ * The accounts the checks sign in with.
+ *
+ * They are the seeded ones in this project's own database. In tn mode they
+ * are the accounts the backend made, which are named differently.
+ */
+const ADMIN = { id: "admin@techneeds.test", password: "admin-demo" };
+const MENTOR = {
+  id: process.env.MENTOR_ID ?? "joel2@gmail.com",
+  password: process.env.MENTOR_PASSWORD ?? "techneeds-demo",
+};
+const MENTEE = {
+  id: process.env.MENTEE_ID ?? "1234567",
+  password: process.env.MENTEE_PASSWORD ?? "techneeds-demo",
+};
+
 const results = [];
 const check = (name, ok, detail = "") => {
   results.push({ name, ok });
@@ -182,7 +198,7 @@ console.log("\nMENTOR PANEL");
 {
   const b = await openBrowser();
   await b.go(`${APP}/login`);
-  await signIn(b, "mentor", "joel2@gmail.com", "techneeds-demo");
+  await signIn(b, "mentor", MENTOR.id, MENTOR.password);
   await b.go(`${APP}/mentor`);
 
   let r = await submitForm(b, "Add mentee", { name: `UI Test Mentee ${stamp}` });
@@ -216,7 +232,7 @@ console.log("\nADMIN PANEL");
 {
   const b = await openBrowser();
   await b.go(`${APP}/login`);
-  await signIn(b, "admin", "admin@techneeds.test", "admin-demo");
+  await signIn(b, "admin", ADMIN.id, ADMIN.password);
   await b.go(`${APP}/admin`);
 
   let r = await submitForm(b, "Create program", { name: `UI Test Program ${stamp}` });
@@ -277,7 +293,7 @@ console.log("\nMENTEE PANEL");
 {
   const b = await openBrowser();
   await b.go(`${APP}/login`);
-  await signIn(b, "mentee", "1234567", "techneeds-demo");
+  await signIn(b, "mentee", MENTEE.id, MENTEE.password);
   await b.go(`${APP}/mentee`);
 
   const r = await b.ev(`(function(){
@@ -343,7 +359,7 @@ console.log("\nTHE TECHBOARD IS THE DASHBOARD");
 {
   const b = await openBrowser();
   await b.go(`${APP}/login`);
-  await signIn(b, "mentee", "1234567", "techneeds-demo");
+  await signIn(b, "mentee", MENTEE.id, MENTEE.password);
   await b.go(`${APP}/techboard`);
 
   const heading = await b.ev(`document.querySelector('h1')?.textContent?.trim()`);
@@ -381,7 +397,7 @@ console.log("\nTHE TECHBOARD IS THE DASHBOARD");
 {
   const b = await openBrowser();
   await b.go(`${APP}/login`);
-  await signIn(b, "mentor", "joel2@gmail.com", "techneeds-demo");
+  await signIn(b, "mentor", MENTOR.id, MENTOR.password);
   await b.go(`${APP}/techboard`);
   const heading = await b.ev(`document.querySelector('h1')?.textContent?.trim()`);
   const hasMentees = await b.ev(
@@ -398,7 +414,7 @@ console.log("\nTHE TECHBOARD IS THE DASHBOARD");
 {
   const b = await openBrowser();
   await b.go(`${APP}/login`);
-  await signIn(b, "admin", "admin@techneeds.test", "admin-demo");
+  await signIn(b, "admin", ADMIN.id, ADMIN.password);
   await b.go(`${APP}/techboard`);
   const hasPrograms = await b.ev(
     `document.body.textContent.includes("Programs and people")`,
@@ -417,7 +433,7 @@ console.log("\nTHE OLD PANEL ROUTES");
 {
   const b = await openBrowser();
   await b.go(`${APP}/login`);
-  await signIn(b, "mentee", "1234567", "techneeds-demo");
+  await signIn(b, "mentee", MENTEE.id, MENTEE.password);
 
   for (const route of ["/mentee", "/mentor", "/admin"]) {
     await b.go(`${APP}${route}`);
@@ -438,7 +454,7 @@ console.log("\nADMIN: DELETING AND ASSIGNING");
 {
   const b = await openBrowser();
   await b.go(`${APP}/login`);
-  await signIn(b, "admin", "admin@techneeds.test", "admin-demo");
+  await signIn(b, "admin", ADMIN.id, ADMIN.password);
   await b.go(`${APP}/techboard`);
 
   // Make a program to delete.
@@ -639,7 +655,7 @@ console.log("\nTHE PROFILE BACKGROUND");
 {
   const b = await openBrowser();
   await b.go(`${APP}/login`);
-  await signIn(b, "mentee", "1234567", "techneeds-demo");
+  await signIn(b, "mentee", MENTEE.id, MENTEE.password);
   await b.go(`${APP}/profile/me`);
 
   const canvas = await b.ev(`(function(){

@@ -1,7 +1,9 @@
 import { connection } from "next/server";
 
-import { describeDatabase, queryOne } from "@/lib/platform/db";
-import { adminCount } from "@/lib/platform/store";
+import { describeDatabase } from "@/lib/platform/db";
+import { adminCount } from "@/lib/platform/admin-store";
+import { counts as platformCounts, usesTnBackend } from "@/lib/platform/store";
+import { TN_BACKEND_URL } from "@/lib/platform/backends/tn";
 
 /**
  * What state the platform is in.
@@ -15,28 +17,14 @@ export async function GET() {
   await connection();
 
   const admins = await adminCount();
-
-  const counts = await queryOne<{
-    programs: number;
-    mentors: number;
-    mentees: number;
-    resources: number;
-  }>(
-    `SELECT
-       (SELECT count(*) FROM programs)  AS programs,
-       (SELECT count(*) FROM mentors)   AS mentors,
-       (SELECT count(*) FROM mentees)   AS mentees,
-       (SELECT count(*) FROM resources) AS resources`,
-  );
+  const counts = await platformCounts();
 
   return Response.json({
     needsSetup: admins === 0,
-    database: describeDatabase(),
-    counts: {
-      programs: counts?.programs ?? 0,
-      mentors: counts?.mentors ?? 0,
-      mentees: counts?.mentees ?? 0,
-      resources: counts?.resources ?? 0,
-    },
+    // Where the platform data is, so the admin panel can say so.
+    backend: usesTnBackend ? "tn" : "sqlite",
+    ...(usesTnBackend ? { backendUrl: TN_BACKEND_URL } : {}),
+    database: usesTnBackend ? TN_BACKEND_URL : describeDatabase(),
+    counts,
   });
 }

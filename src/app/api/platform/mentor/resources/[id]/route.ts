@@ -1,5 +1,11 @@
 import { apiMentor } from "@/lib/platform/guards";
-import { audit, getResource, updateResource } from "@/lib/platform/store";
+import {
+  getResource,
+  updateResource,
+} from "@/lib/platform/store";
+import {
+  audit,
+} from "@/lib/platform/admin-store";
 import type { ResourceType } from "@/lib/platform/types";
 
 /**

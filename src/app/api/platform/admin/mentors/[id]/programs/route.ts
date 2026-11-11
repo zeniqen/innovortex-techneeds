@@ -1,10 +1,12 @@
 import { apiUser } from "@/lib/platform/guards";
 import {
   assignMentorToProgram,
-  audit,
   getMentor,
   getProgram,
 } from "@/lib/platform/store";
+import {
+  audit,
+} from "@/lib/platform/admin-store";
 
 /**
  * The programs a mentor runs.

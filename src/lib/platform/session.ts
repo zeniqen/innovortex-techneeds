@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { connection } from "next/server";
 
 import { execute, queryOne } from "./db";
+import { SESSION_COOKIE } from "./session-cookie";
+import { getMentee, getMentor, usesTnBackend } from "./store";
 import type { Role, SessionUser } from "./types";
 
 /**
@@ -12,11 +14,12 @@ import type { Role, SessionUser } from "./types";
  * token. Only the hash of the token is stored, so a read of the sessions
  * table does not hand over a usable credential.
  *
- * The cookie is httpOnly, so a script on the page cannot read it, and
- * sameSite lax, so a link from another site cannot ride it.
+ * When the platform data is being held by the tn backend, the session
+ * also keeps the token that backend issued, because that is what the
+ * backend wants to see on every later request.
  */
 
-export const SESSION_COOKIE = "tn_session";
+export { SESSION_COOKIE };
 
 /**
  * How long a session lasts.
@@ -36,17 +39,19 @@ function tokenHash(token: string): string {
 export async function createSession(
   role: Role,
   userId: string,
+  upstreamToken?: string,
 ): Promise<string> {
   const token = randomBytes(32).toString("base64url");
   const now = Date.now();
 
   await execute(
-    `INSERT INTO sessions (id, role, user_id, created_at, expires_at)
-     VALUES (?, ?, ?, ?, ?)`,
+    `INSERT INTO sessions (id, role, user_id, token, created_at, expires_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
     [
       tokenHash(token),
       role,
       userId,
+      upstreamToken ?? null,
       new Date(now).toISOString(),
       new Date(now + SESSION_TTL_MS).toISOString(),
     ],
@@ -138,40 +143,30 @@ async function userForSession(
   userId: string,
 ): Promise<SessionUser | null> {
   if (role === "mentee") {
-    const mentee = await queryOne<{
-      id: string;
-      name: string;
-      enrollment_number: string;
-    }>(
-      `SELECT id, name, enrollment_number FROM mentees WHERE id = ?`,
-      [userId],
-    );
+    const mentee = await getMentee(userId);
     if (!mentee) return null;
     return {
       role,
       id: mentee.id,
       name: mentee.name,
-      identifier: mentee.enrollment_number,
-      programIds: await programIdsFor("mentee", mentee.id),
+      identifier: mentee.enrollmentNumber,
+      programIds: mentee.programIds,
     };
   }
 
   if (role === "mentor") {
-    const mentor = await queryOne<{
-      id: string;
-      name: string;
-      email: string;
-    }>(`SELECT id, name, email FROM mentors WHERE id = ?`, [userId]);
+    const mentor = await getMentor(userId);
     if (!mentor) return null;
     return {
       role,
       id: mentor.id,
       name: mentor.name,
       identifier: mentor.email,
-      programIds: await programIdsFor("mentor", mentor.id),
+      programIds: mentor.programIds,
     };
   }
 
+  // The admin is always ours, whichever backend holds the platform data.
   const admin = await queryOne<{
     id: string;
     name: string;
@@ -189,18 +184,18 @@ async function userForSession(
 }
 
 /**
- * The programs a user is attached to.
+ * The token the tn backend issued, if the session has one.
  */
-async function programIdsFor(
-  role: "mentor" | "mentee",
-  userId: string,
-): Promise<string[]> {
-  const table = role === "mentor" ? "mentor_programs" : "mentee_programs";
-  const column = role === "mentor" ? "mentor_id" : "mentee_id";
-  const rows = await queryOne<{ ids: string }>(
-    `SELECT group_concat(program_id) AS ids FROM ${table} WHERE ${column} = ?`,
-    [userId],
+export async function upstreamToken(): Promise<string | null> {
+  if (!usesTnBackend) return null;
+
+  const store = await cookies();
+  const token = store.get(SESSION_COOKIE)?.value;
+  if (!token) return null;
+
+  const row = await queryOne<{ token: string | null }>(
+    `SELECT token FROM sessions WHERE id = ?`,
+    [tokenHash(token)],
   );
-  if (!rows?.ids) return [];
-  return rows.ids.split(",").filter(Boolean);
+  return row?.token ?? null;
 }

@@ -1,5 +1,12 @@
 import { apiMentor } from "@/lib/platform/guards";
-import { audit, getResource, gradeResource, listMenteesForProgram } from "@/lib/platform/store";
+import {
+  getResource,
+  gradeResource,
+  listMenteesForProgram,
+} from "@/lib/platform/store";
+import {
+  audit,
+} from "@/lib/platform/admin-store";
 
 /**
  * Grading a submission.

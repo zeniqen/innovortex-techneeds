@@ -1,10 +1,12 @@
 import { apiUser } from "@/lib/platform/guards";
 import {
-  audit,
   createProgram,
   listMentorsForProgram,
   listPrograms,
 } from "@/lib/platform/store";
+import {
+  audit,
+} from "@/lib/platform/admin-store";
 
 /**
  * The programs an admin manages.

@@ -1,5 +1,10 @@
 import { apiUser } from "@/lib/platform/guards";
-import { audit, removeMentorFromProgram } from "@/lib/platform/store";
+import {
+  removeMentorFromProgram,
+} from "@/lib/platform/store";
+import {
+  audit,
+} from "@/lib/platform/admin-store";
 
 /**
  * Takes a mentor off a program.

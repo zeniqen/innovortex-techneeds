@@ -163,6 +163,7 @@ const MIGRATIONS: { name: string; sql: string }[] = [
         id         TEXT PRIMARY KEY,
         role       TEXT NOT NULL,
         user_id    TEXT NOT NULL,
+        token      TEXT,
         created_at TEXT NOT NULL,
         expires_at TEXT NOT NULL
       );
@@ -206,5 +207,14 @@ export async function migrate(
 ): Promise<void> {
   for (const migration of MIGRATIONS) {
     await execute(migration.sql);
+  }
+
+  // A column that was added later is not picked up by CREATE TABLE IF NOT
+  // EXISTS, so it is added separately. The error is ignored because the
+  // column is usually there already.
+  try {
+    await execute(`ALTER TABLE sessions ADD COLUMN token TEXT`);
+  } catch {
+    // The column is already there.
   }
 }

@@ -1,5 +1,10 @@
 import { apiUser } from "@/lib/platform/guards";
-import { audit, deleteMentor } from "@/lib/platform/store";
+import {
+  deleteMentor,
+} from "@/lib/platform/store";
+import {
+  audit,
+} from "@/lib/platform/admin-store";
 
 /**
  * Removes a mentor from the platform.

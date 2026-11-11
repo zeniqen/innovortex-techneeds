@@ -1,5 +1,11 @@
 import { apiUser } from "@/lib/platform/guards";
-import { audit, deleteProgram, updateProgram } from "@/lib/platform/store";
+import {
+  deleteProgram,
+  updateProgram,
+} from "@/lib/platform/store";
+import {
+  audit,
+} from "@/lib/platform/admin-store";
 
 /**
  * One program.

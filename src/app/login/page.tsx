@@ -8,7 +8,9 @@ import { SetupCard } from "@/components/platform/setup-card";
 import Footer from "@/components/footer";
 import FloatingDockDemo from "@/components/floating-dock-demo";
 import { optionalUser, panelPath } from "@/lib/platform/guards";
-import { adminCount } from "@/lib/platform/store";
+import {
+  adminCount,
+} from "@/lib/platform/admin-store";
 
 export const metadata: Metadata = {
   title: "Sign in | TechNeeds IGDTUW",

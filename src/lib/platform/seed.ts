@@ -1,9 +1,9 @@
 import { execute, queryOne } from "./db";
+import { createAdmin, resetAdmins } from "./admin-store";
 import { newId } from "./credentials";
 import {
   assignMentorToProgram,
   assignMenteeToProgram,
-  createAdmin,
   createMentor,
   createMentee,
   createProgram,
@@ -46,8 +46,13 @@ const SOURCE = "https://tn-backend-1.onrender.com";
 
 /**
  * How long a request to the live backend may take.
+ *
+ * The backend runs on a free tier and goes to sleep when nobody is using
+ * it, so the first request after a quiet spell can take twenty seconds or
+ * more to come back. A seed that gives up before then leaves the platform
+ * empty with only a warning to show for it.
  */
-const SOURCE_TIMEOUT_MS = 12000;
+const SOURCE_TIMEOUT_MS = 45000;
 
 export interface SeedReport {
   /** The admin account that was created. */
@@ -197,6 +202,10 @@ export async function seedPlatform(): Promise<SeedReport> {
   if (existing && existing.count > 0) {
     throw new Error("The platform already has programs; nothing was seeded.");
   }
+
+  // An earlier attempt may have made an admin and then failed, which would
+  // make this one collide with it. Start from nothing.
+  await resetAdmins();
 
   const adminEmail = "admin@techneeds.test";
   const adminPassword = "admin-demo";

@@ -1,7 +1,6 @@
 # The mentorship platform
 
-Three panels for the three roles on the TechNeeds mentorship platform, and
-a profile page for everybody.
+Three panels and a profile page, over a choice of two backends.
 
 | Route | Who it is for | What it does |
 |---|---|---|
@@ -24,16 +23,43 @@ Every page on the platform keeps the site's own navigation: the floating
 dock and the footer. The dock's profile link goes to `/profile/me`, which
 resolves to whoever is signed in.
 
+## Two backends
+
+The panels ask one set of questions. Where the answers come from is an
+environment variable.
+
+| | `PLATFORM_BACKEND=sqlite` (the default) | `PLATFORM_BACKEND=tn` |
+|---|---|---|
+| Where the data lives | a SQLite file in `.data/` | the Express and MongoDB backend in `backend/` |
+| Needs setting up | nothing | MongoDB, and `cd backend && npm install` |
+| Works on a serverless host | no, unless `DATABASE_URL` points at Turso | yes, if the MongoDB is reachable |
+
+The SQLite one is the default because it works with one command and
+nothing installed. The tn one is there so the panels can run against the
+backend that came with the platform.
+
+```
+PLATFORM_BACKEND=tn
+TN_BACKEND_URL=http://localhost:8000
+TN_ADMIN_KEY=the same key as the backend's ADMIN_KEY
+```
+
+`DATABASE_URL` overrides where the SQLite file lives, and is what a
+serverless host needs:
+
+```
+DATABASE_URL=libsql://your-database.turso.io
+DATABASE_AUTH_TOKEN=...
+```
+
 ## Running it
 
-The platform needs a database. In development that is a file in `.data/`,
-which is created the first time the app runs:
-
 ```bash
+npm install
 npm run dev
 ```
 
-Then open <http://localhost:3000/login>. The platform is empty, so the
+Open <http://localhost:3000/login>. The platform is empty, so the
 sign-in page offers to set it up instead. That creates the first admin and
 copies the live platform in: 17 programs, 26 mentors, 31 mentees and 31
 resources. It takes about twenty seconds.
@@ -44,28 +70,39 @@ all share one password, `techneeds-demo`, and the admin is `admin-demo`.
 Setting the platform up again, from the same screen, is allowed and
 throws the old data away first.
 
-## Where the data comes from
+## Running against the tn backend
 
-The seed reads the live TechNeeds backend at
-`https://tn-backend-1.onrender.com` and copies what it finds. That
-backend is **read only from here**. It cannot be written to: both of its
-login routes return a 500, and its write routes need a bearer token that
-those routes would have issued, so there is no way to get one.
+In one terminal:
 
-Three things are changed on the way in, and all three are deliberate:
+```bash
+cd backend
+npm install
+cp .env.example .env      # fill in MONGO_URI, JWT_SECRET and ADMIN_KEY
+npm run seed              # one program, a mentor and a mentee to sign in with
+npm start
+```
 
-- **Credentials.** The live backend stores password hashes and never
-  shows the passwords, so there is nothing to copy. Every seeded account
-  gets `techneeds-demo` instead.
-- **Deadlines.** Almost every deadline on the live platform is in the
-  past. The schedule is squeezed into the next three months, keeping its
-  order, so there is work that is open and work that is due soon.
-- **Scores.** The live platform records each mentee's total but not which
-  pieces of work earned it. The seed spreads the score across the
-  mentee's own work, smallest piece first, so the points, the badges and
-  the level all agree with each other.
+In another:
 
-The enrollment numbers are the live ones, so the copy is recognisable.
+```bash
+PLATFORM_BACKEND=tn \
+TN_BACKEND_URL=http://localhost:8000 \
+TN_ADMIN_KEY=the ADMIN_KEY from backend/.env \
+npm run dev
+```
+
+The seed prints the demo accounts:
+
+```
+  mentor   smith@example.com / techneeds-demo
+  mentee   DEMO0001 / techneeds-demo
+```
+
+The admin is still `admin@techneeds.test` / `admin-demo`, because the tn
+backend has no admin role: an admin is the person who runs the platform
+rather than a person in it, so they stay in this project's own database.
+
+See `backend/README.md` for what was changed in the backend.
 
 ## What an admin can do
 
@@ -89,37 +126,6 @@ On the techboard, signed in as an admin:
 - **Add another admin.**
 
 Deleting asks first: the button arms, and a second press does it.
-
-## The database
-
-SQLite, through `@libsql/client`. The same database is a file on disk in
-development and a remote libSQL/Turso database in production, so the
-deployment target decides one environment variable and nothing else.
-
-| Variable | What it does |
-|---|---|
-| `DATABASE_URL` | `file:...` for a local file, `libsql://...` for a remote one. Without it the platform uses `.data/techneeds.db`. |
-
-On a serverless platform there is no writable disk, so `DATABASE_URL` has
-to point at a remote database. Nothing else in the codebase knows the
-difference.
-
-The tables are created on first use (`src/lib/platform/schema.ts`), so
-there is no migration step to remember.
-
-## Credentials and sessions
-
-- Mentees sign in with an enrollment number: eight characters from a
-  Crockford alphabet, so an enrollment number read off a printed sheet
-  cannot be mistyped into another one.
-- Mentors and admins sign in with an email address.
-- Passwords are hashed with scrypt from the Node standard library, so
-  there is no native module to compile and nothing to install.
-- A session is a row in the database and an httpOnly cookie holding the
-  token. Only the hash of the token is stored, so reading the sessions
-  table does not hand over a usable credential.
-- Credentials that are generated are shown **once** and never stored in
-  the clear. The panel in front of you is the only copy.
 
 ## The profile page
 
@@ -150,24 +156,49 @@ main thread and drops no frames.
 ```
 src/lib/platform/
   types.ts        the domain model
-  schema.ts       the tables
+  schema.ts       the tables, for the SQLite backend
   db.ts           the connection and the migration
+  clock.ts        reading the clock in one place
+  dates.ts        dates, formatted the same way everywhere
   credentials.ts  enrollment numbers, passwords, hashing
   session.ts      sessions
-  auth.ts         signing in
-  store.ts        every read and write
-  seed.ts         copying the live platform in
+  session-cookie.ts  the name of the session cookie
+  auth.ts         signing in, against either backend
   guards.ts       who is allowed on which page
-  dates.ts        dates, formatted the same way everywhere
-  clock.ts        reading the clock in one place
+  store.ts        chooses the backend and re-exports it
+  store-types.ts  the interface both backends implement
+  admin-store.ts  the admins and the audit log, always local
+  seed.ts         copying the live platform in
+  backends/
+    sqlite.ts     the default: this project's own database
+    tn.ts         the Express and MongoDB backend
   ai/
     avatar.ts     the generative crest
     profile.ts    the profile engine
 
-src/app/api/platform/   the API
+backend/          the Express and MongoDB backend
+src/app/api/platform/   the API the panels write through
 src/app/{techboard,login,profile}   the pages
 src/components/platform/   the panel components
-  mentee-panel.tsx, mentor-panel.tsx, admin-panel.tsx
+scripts/ui-check.mjs    the browser checks
+```
+
+## Checking it
+
+```bash
+npm run check:ui
+```
+
+This drives the panels in a real browser, pressing the buttons, and
+checks what came back. It covers the three roles landing on the right
+panel, the navigation being there, the profile link resolving to the right
+person, the old routes redirecting, the admin creating and deleting, the
+smooth cursor and the particle background.
+
+To run it against the tn backend, give it the tn demo accounts:
+
+```bash
+MENTOR_ID=smith@example.com MENTEE_ID=DEMO0001 npm run check:ui
 ```
 
 ## Two things worth knowing about Next 16

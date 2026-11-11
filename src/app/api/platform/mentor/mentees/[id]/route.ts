@@ -1,5 +1,10 @@
 import { apiMentor } from "@/lib/platform/guards";
-import { audit, removeMenteeFromProgram } from "@/lib/platform/store";
+import {
+  removeMenteeFromProgram,
+} from "@/lib/platform/store";
+import {
+  audit,
+} from "@/lib/platform/admin-store";
 
 /**
  * Takes a mentee off a program.
