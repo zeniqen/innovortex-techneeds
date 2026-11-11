@@ -50,7 +50,11 @@ async function openBrowser() {
     if (m.id && pending.has(m.id)) {
       const { res, rej } = pending.get(m.id);
       pending.delete(m.id);
-      m.error ? rej(new Error(JSON.stringify(m.error))) : res(m.result);
+      if (m.error) {
+        rej(new Error(JSON.stringify(m.error)));
+      } else {
+        res(m.result);
+      }
     }
     if (m.method === "Network.requestWillBeSent" && m.params.request.url.includes("/api/platform")) {
       calls.push({ url: m.params.request.url, body: m.params.request.postData });
