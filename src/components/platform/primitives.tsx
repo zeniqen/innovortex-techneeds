@@ -28,7 +28,7 @@ import type { Role } from "@/lib/platform/types";
  */
 export function PanelSkeleton() {
   return (
-    <div className="relative min-h-screen bg-[var(--color-emptiness)] text-[var(--color-caviar)]">
+    <div className="relative bg-[var(--color-emptiness)] text-[var(--color-caviar)]">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="h-5 w-28 animate-pulse rounded-full bg-[var(--color-night-white)]" />
         <div className="mt-4 h-10 w-72 animate-pulse rounded-xl bg-[var(--color-night-white)]" />
@@ -71,7 +71,7 @@ export function PanelShell({
   children: ReactNode;
 }) {
   return (
-    <div className="relative min-h-screen bg-[var(--color-emptiness)] text-[var(--color-caviar)]">
+    <div className="relative bg-[var(--color-emptiness)] text-[var(--color-caviar)]">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <header className="flex flex-col gap-6 border-b border-[var(--color-spotted-dove)] pb-8 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">

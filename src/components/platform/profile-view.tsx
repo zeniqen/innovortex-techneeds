@@ -34,7 +34,7 @@ export function ProfileView({
   showLeaderboard?: boolean;
 }) {
   return (
-    <div className="relative min-h-screen bg-[var(--color-emptiness)] text-[var(--color-caviar)]">
+    <div className="relative bg-[var(--color-emptiness)] text-[var(--color-caviar)]">
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         {/* --- the header ---------------------------------------------------- */}
         <header className="grid gap-8 md:grid-cols-[auto_1fr] md:items-center">
@@ -213,12 +213,10 @@ export function ProfileView({
 
             {isSelf && (
               <Link
-                href={role === "mentor" ? "/mentor" : "/mentee"}
+                href="/techboard"
                 className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--color-spotted-dove)] px-5 py-4 transition-colors duration-150 hover:bg-[var(--color-night-white)]"
               >
-                <span className="text-sm font-bold">
-                  Back to the {role} panel
-                </span>
+                <span className="text-sm font-bold">Back to your dashboard</span>
                 <IconArrowUpRight className="h-4 w-4 text-[var(--color-iron-fixture)]" />
               </Link>
             )}

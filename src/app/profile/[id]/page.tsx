@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
+import Footer from "@/components/footer";
+import FloatingDockDemo from "@/components/floating-dock-demo";
 import { ProfileView } from "@/components/platform/profile-view";
 import { PanelSkeleton } from "@/components/platform/primitives";
 import { requireUser } from "@/lib/platform/guards";
@@ -47,9 +49,16 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   return (
-    <Suspense fallback={<PanelSkeleton />}>
-      <ProfileBody params={params} />
-    </Suspense>
+    <div className="relative flex min-h-screen flex-col bg-[var(--color-emptiness)] text-[var(--color-caviar)] selection:bg-[var(--color-caviar)] selection:text-[var(--color-emptiness)]">
+      <main className="flex-1">
+        <Suspense fallback={<PanelSkeleton />}>
+          <ProfileBody params={params} />
+        </Suspense>
+      </main>
+
+      <Footer />
+      <FloatingDockDemo />
+    </div>
   );
 }
 
@@ -61,7 +70,11 @@ async function ProfileBody({ params }: { params: Promise<{ id: string }> }) {
   const rows = await leaderboard(50);
   const programs = await listPrograms();
 
-  const mentor = await getMentor(id);
+  // "me" is what the navigation uses, so the profile link works without
+  // the page having to know who is signed in.
+  const wanted = id === "me" ? user.id : id;
+
+  const mentor = await getMentor(wanted);
   if (mentor) {
     const input = await mentorInput(
       mentor.id,
@@ -82,7 +95,7 @@ async function ProfileBody({ params }: { params: Promise<{ id: string }> }) {
     );
   }
 
-  const mentee = await getMentee(id);
+  const mentee = await getMentee(wanted);
   if (!mentee) notFound();
 
   const input = await menteeInput(

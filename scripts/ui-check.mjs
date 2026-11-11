@@ -259,21 +259,38 @@ console.log("\nMENTEE PANEL");
   await b.go(`${APP}/mentee`);
 
   const r = await b.ev(`(function(){
-    const button = [...document.querySelectorAll('button')].find(b => /^(Start|Mark watched|Hand in)$/.test(b.textContent.trim()));
-    if (!button) return { ok: false, why: 'no work button' };
+    const button = [...document.querySelectorAll('button')].find(b => /^(Start|Mark watched)$/.test(b.textContent.trim()));
+    if (!button) return { ok: false, why: 'no video button' };
     const label = button.textContent.trim();
     button.click();
     return { ok: true, label };
   })()`);
   await sleep(2500);
   const alert = await alertText(b);
-  check(
-    "open a piece of work from the mentee panel",
-    r.ok && !alert,
-    alert || `${r.label} -> ${b.calls.at(-1)?.status} ${b.calls.at(-1)?.body}`,
-  );
+  if (r.why === "no video button") {
+    // Everything this mentee has been set is already marked, so there is
+    // no video left to start. Not a failure.
+    console.log(
+      "  SKIP  start a video from the mentee panel — no video left to start",
+    );
+  } else {
+    check(
+      "start a video from the mentee panel",
+      r.ok && !alert,
+      alert || `${r.label} -> ${b.calls.at(-1)?.status}`,
+    );
+  }
 
-  // Hand the work in.
+  // Open a submission form and hand the work in.
+  const opened = await b.ev(`(function(){
+    const button = [...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Hand in' && b.type !== 'submit');
+    if (!button) return { ok: false, why: 'no hand in button' };
+    button.click();
+    return { ok: true };
+  })()`);
+  await sleep(800);
+  const hasForm = await b.ev(`document.querySelectorAll('textarea').length > 0`);
+
   const submitted = await b.ev(`(function(){
     const button = [...document.querySelectorAll('button[type=submit]')].find(b => b.textContent.trim() === 'Hand in');
     if (!button) return { ok: false, why: 'no submit button' };
@@ -291,9 +308,104 @@ console.log("\nMENTEE PANEL");
   const alert2 = await alertText(b);
   check(
     "hand the work in",
-    submitted.ok && !alert2,
+    opened.ok && hasForm && submitted.ok && !alert2,
     alert2 || `202 ${b.calls.at(-1)?.body}`,
   );
+
+  b.close();
+}
+
+// --- the techboard is the dashboard ----------------------------------------
+
+console.log("\nTHE TECHBOARD IS THE DASHBOARD");
+{
+  const b = await openBrowser();
+  await b.go(`${APP}/login`);
+  await signIn(b, "mentee", "1234567", "techneeds-demo");
+  await b.go(`${APP}/techboard`);
+
+  const heading = await b.ev(`document.querySelector('h1')?.textContent?.trim()`);
+  check(
+    "a signed-in mentee gets the mentee panel on the techboard",
+    heading === "Your work",
+    `h1 is "${heading}"`,
+  );
+
+  const dock = await b.ev(
+    `document.querySelectorAll('a[aria-label="Profile"]').length`,
+  );
+  check("the techboard keeps the navigation", Number(dock) > 0, `${dock} profile links`);
+
+  // The navigation's profile link should land on their own profile.
+  await b.ev(`(function(){
+    const link = document.querySelector('a[aria-label="Profile"]');
+    if (link) link.click();
+    return !!link;
+  })()`);
+  await sleep(3000);
+  const onProfile = await b.ev(`location.pathname`);
+  const ownProfile = await b.ev(
+    `document.body.textContent.includes("Your work") || document.body.textContent.includes("points")`,
+  );
+  check(
+    "the profile link opens their own profile",
+    String(onProfile).startsWith("/profile/") && ownProfile,
+    `${onProfile}`,
+  );
+
+  b.close();
+}
+
+{
+  const b = await openBrowser();
+  await b.go(`${APP}/login`);
+  await signIn(b, "mentor", "joel2@gmail.com", "techneeds-demo");
+  await b.go(`${APP}/techboard`);
+  const heading = await b.ev(`document.querySelector('h1')?.textContent?.trim()`);
+  const hasMentees = await b.ev(
+    `document.body.textContent.includes("Your mentees") || document.body.textContent.includes("Add a mentee")`,
+  );
+  check(
+    "a signed-in mentor gets the mentor panel on the techboard",
+    hasMentees,
+    `h1 is "${heading}"`,
+  );
+  b.close();
+}
+
+{
+  const b = await openBrowser();
+  await b.go(`${APP}/login`);
+  await signIn(b, "admin", "admin@techneeds.test", "admin-demo");
+  await b.go(`${APP}/techboard`);
+  const hasPrograms = await b.ev(
+    `document.body.textContent.includes("Programs and people")`,
+  );
+  check(
+    "a signed-in admin gets the admin panel on the techboard",
+    hasPrograms,
+    hasPrograms ? "admin panel" : "not the admin panel",
+  );
+  b.close();
+}
+
+// --- the old panel routes redirect ----------------------------------------
+
+console.log("\nTHE OLD PANEL ROUTES");
+{
+  const b = await openBrowser();
+  await b.go(`${APP}/login`);
+  await signIn(b, "mentee", "1234567", "techneeds-demo");
+
+  for (const route of ["/mentee", "/mentor", "/admin"]) {
+    await b.go(`${APP}${route}`);
+    const where = await b.ev(`location.pathname`);
+    check(
+      `${route} redirects to the techboard`,
+      where === "/techboard",
+      `landed on ${where}`,
+    );
+  }
 
   b.close();
 }

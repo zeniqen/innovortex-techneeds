@@ -46,6 +46,9 @@ export default function FloatingDockDemo() {
     {
       title: "Profile",
       icon: <IconUserCircle className="h-full w-full" />,
+      // Resolves to the signed-in person's own profile. Signed out, the
+      // profile page asks them to sign in.
+      href: "/profile/me",
     },
   ];
 

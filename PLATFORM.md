@@ -5,11 +5,24 @@ a profile page for everybody.
 
 | Route | Who it is for | What it does |
 |---|---|---|
+| `/techboard` | everybody | The techboard. Signed out, it asks whether you are a mentee, a mentor or neither. Signed in, it is your dashboard. |
 | `/login` | everybody | Sign in. A mentee uses their enrollment number, a mentor and an admin use their email. |
-| `/admin` | admin | Create programs, onboard mentors, put mentors on programs, add other admins. |
-| `/mentor` | mentor | Add mentees, publish resources, mark the work that comes back. |
-| `/mentee` | mentee | Work through what they have been set, hand it in, watch their score and their rank. |
-| `/profile/[id]` | anybody signed in | The generated profile: a crest, badges, a summary and what to work on next. |
+| `/profile/[id]` | anybody signed in | The generated profile: a crest, badges, a summary and what to work on next. `/profile/me` is your own. |
+
+The three panels are not pages of their own. They are the techboard, which
+shows you the panel that belongs to your role:
+
+- a **mentee** gets their work, their scores and their rank
+- a **mentor** gets their mentees, the resources they have published, and
+  the work waiting to be marked
+- an **admin** gets the programs, the mentors and the people on them
+
+`/mentee`, `/mentor` and `/admin` still exist and redirect to the
+techboard, so an old link lands somewhere sensible.
+
+Every page on the platform keeps the site's own navigation: the floating
+dock and the footer. The dock's profile link goes to `/profile/me`, which
+resolves to whoever is signed in.
 
 ## Running it
 
@@ -122,8 +135,9 @@ src/lib/platform/
     profile.ts    the profile engine
 
 src/app/api/platform/   the API
-src/app/{admin,mentor,mentee,login,profile}   the pages
+src/app/{techboard,login,profile}   the pages
 src/components/platform/   the panel components
+  mentee-panel.tsx, mentor-panel.tsx, admin-panel.tsx
 ```
 
 ## Two things worth knowing about Next 16

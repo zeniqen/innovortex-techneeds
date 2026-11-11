@@ -5,6 +5,8 @@ import { IconArrowLeft } from "@tabler/icons-react";
 
 import { SignInForm } from "@/components/platform/sign-in-form";
 import { SetupCard } from "@/components/platform/setup-card";
+import Footer from "@/components/footer";
+import FloatingDockDemo from "@/components/floating-dock-demo";
 import { optionalUser, panelPath } from "@/lib/platform/guards";
 import { adminCount } from "@/lib/platform/store";
 
@@ -27,11 +29,16 @@ export const instant = false;
  */
 export default function Page() {
   return (
-    <main className="flex min-h-screen flex-col bg-[var(--color-emptiness)] text-[var(--color-caviar)]">
-      <Suspense fallback={<SignInFallback />}>
-        <SignInBody />
-      </Suspense>
-    </main>
+    <div className="relative flex min-h-screen flex-col bg-[var(--color-emptiness)] text-[var(--color-caviar)] selection:bg-[var(--color-caviar)] selection:text-[var(--color-emptiness)]">
+      <main className="flex flex-1 flex-col">
+        <Suspense fallback={<SignInFallback />}>
+          <SignInBody />
+        </Suspense>
+      </main>
+
+      <Footer />
+      <FloatingDockDemo />
+    </div>
   );
 }
 
