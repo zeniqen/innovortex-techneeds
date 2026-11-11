@@ -57,7 +57,7 @@ async function openBrowser() {
     }
     if (m.method === "Network.responseReceived" && m.params.response.url.includes("/api/platform")) {
       const entry = calls.find((c) => c.url === m.params.response.url);
-      if (entry) entry.status = m.params.response.status;
+      if (entry) { entry.status = m.params.response.status; }
     }
   };
 
