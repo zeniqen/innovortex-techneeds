@@ -115,6 +115,20 @@ body {
   scroll-behavior: smooth;
 }
 
+/* The custom cursor in src/components/ui/smooth-cursor.tsx replaces the
+   native one. Without this the two are drawn on top of each other. */
+* {
+  cursor: none !important;
+}
+
+/* A caret is more use than an arrow in a field. The custom cursor gets out
+   of the way over one, so the native caret is the only one showing. */
+input,
+textarea,
+select {
+  cursor: text !important;
+}
+
 /* Custom minimal scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

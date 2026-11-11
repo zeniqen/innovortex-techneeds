@@ -7,6 +7,7 @@ import {
 } from "@tabler/icons-react";
 
 import { Crest } from "./crest";
+import { Particles } from "@/components/ui/particles";
 import { Chip, PanelCard, StatCard } from "./primitives";
 import { cn } from "@/lib/utils";
 import type { AiProfile } from "@/lib/platform/ai/profile";
@@ -35,7 +36,20 @@ export function ProfileView({
 }) {
   return (
     <div className="relative bg-[var(--color-emptiness)] text-[var(--color-caviar)]">
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+      {/* The particles sit behind the profile. The canvas is the height of
+          the viewport rather than the height of the page: it is cleared and
+          redrawn every frame, and a canvas the height of a long page is
+          four times the work for a background nobody can tell apart. */}
+      <Particles
+        className="sticky top-0 z-0 h-screen w-full"
+        quantity={70}
+        size={0.5}
+        staticity={60}
+        ease={60}
+        color="#95898B"
+      />
+
+      <div className="relative z-10 mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         {/* --- the header ---------------------------------------------------- */}
         <header className="grid gap-8 md:grid-cols-[auto_1fr] md:items-center">
           <div className="relative mx-auto size-36 shrink-0 sm:size-44">

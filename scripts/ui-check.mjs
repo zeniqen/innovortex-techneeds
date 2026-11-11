@@ -98,6 +98,15 @@ async function openBrowser() {
       await send("Page.navigate", { url });
       await sleep(2500);
     },
+    /** Moves the pointer, which is how the custom cursor is driven. */
+    move: async (x, y) => {
+      await send("Input.dispatchMouseEvent", {
+        type: "mouseMoved",
+        x,
+        y,
+        button: "none",
+      });
+    },
     close: () => {
       ws.close();
       chrome.kill();
@@ -560,6 +569,98 @@ console.log("\nADMIN: DELETING AND ASSIGNING");
     armedMentor.why ??
       confirmedMentor.why ??
       (mentorGone ? "gone from the list" : "still listed"),
+  );
+
+  b.close();
+}
+
+// --- the smooth cursor ----------------------------------------------------
+
+console.log("\nTHE SMOOTH CURSOR");
+{
+  const b = await openBrowser();
+  await b.go(`${APP}/faq`);
+
+  // Sweep the pointer across the page.
+  for (let i = 0; i < 30; i++) {
+    await b.move(200 + i * 20, 300 + Math.sin(i / 4) * 80);
+    await sleep(16);
+  }
+  await sleep(500);
+
+  const cursor = await b.ev(`(function(){
+    const el = [...document.querySelectorAll('div')].find(d => d.style.position === 'fixed' && d.style.pointerEvents === 'none' && d.querySelector('svg'));
+    if (!el) return null;
+    const box = el.getBoundingClientRect();
+    return { x: Math.round(box.left + box.width/2), y: Math.round(box.top + box.height/2) };
+  })()`);
+  check(
+    "the custom cursor is on the page and follows the pointer",
+    cursor !== null && cursor.x > 400,
+    cursor ? `at ${cursor.x},${cursor.y}` : "not found",
+  );
+
+  const native = await b.ev(`getComputedStyle(document.body).cursor`);
+  check("the native cursor is hidden", native === "none", `body cursor is ${native}`);
+
+  // Over a text field the native caret comes back and the custom one goes.
+  const box = await b.ev(`(function(){
+    const input = document.querySelector('input');
+    if (!input) return null;
+    const r = input.getBoundingClientRect();
+    return { x: Math.round(r.left + 8), y: Math.round(r.top + r.height/2) };
+  })()`);
+  if (box) {
+    await b.move(box.x, box.y);
+    await sleep(500);
+    const overField = await b.ev(`(function(){
+      const el = [...document.querySelectorAll('div')].find(d => d.style.position === 'fixed' && d.style.pointerEvents === 'none' && d.querySelector('svg'));
+      const input = document.querySelector('input');
+      return {
+        custom: el ? Number(getComputedStyle(el).opacity) : 1,
+        native: getComputedStyle(input).cursor,
+      };
+    })()`);
+    check(
+      "it gets out of the way over a text field",
+      overField.custom < 0.1 && overField.native === "text",
+      `custom opacity ${overField.custom}, native cursor ${overField.native}`,
+    );
+  } else {
+    console.log("  SKIP  the text field check — no input on the page");
+  }
+
+  b.close();
+}
+
+// --- the profile background ------------------------------------------------
+
+console.log("\nTHE PROFILE BACKGROUND");
+{
+  const b = await openBrowser();
+  await b.go(`${APP}/login`);
+  await signIn(b, "mentee", "1234567", "techneeds-demo");
+  await b.go(`${APP}/profile/me`);
+
+  const canvas = await b.ev(`(function(){
+    const c = document.querySelector('canvas');
+    if (!c) return null;
+    const box = c.getBoundingClientRect();
+    return { w: Math.round(box.width), h: Math.round(box.height) };
+  })()`);
+  check(
+    "the profile has a particle canvas behind it",
+    canvas !== null && canvas.w > 0 && canvas.h > 0,
+    canvas ? `${canvas.w}x${canvas.h}` : "no canvas",
+  );
+
+  // The canvas has to be the height of the viewport, not the height of
+  // the page: it is cleared and redrawn every frame.
+  const viewport = await b.ev(`window.innerHeight`);
+  check(
+    "the canvas is the height of the viewport, not the page",
+    canvas !== null && canvas.h <= viewport + 2,
+    `canvas ${canvas?.h}px, viewport ${viewport}px`,
   );
 
   b.close();

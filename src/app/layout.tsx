@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { LoadingScreen } from "@/components/loading-screen";
+import { SmoothCursor } from "@/components/ui/smooth-cursor";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,8 @@ export default function RootLayout({
             remounts when the user moves between pages. */}
         <LoadingScreen />
         {children}
+        {/* Last, so it is drawn over the loading screen. */}
+        <SmoothCursor />
       </body>
     </html>
   );

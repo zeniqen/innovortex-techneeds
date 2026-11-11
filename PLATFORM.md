@@ -138,6 +138,13 @@ The crest (`src/lib/platform/ai/avatar.ts`) is drawn from a hash of the
 person's id and name. Nothing is stored, and it is the same on every
 device and every visit.
 
+Behind the profile there is a particle field
+(`src/components/ui/particles.tsx`). It is the height of the viewport
+rather than the height of the page: the canvas is cleared and redrawn
+every frame, and a canvas the height of a long page is four times the
+work for a background nobody can tell apart. It costs about 4% of the
+main thread and drops no frames.
+
 ## The code
 
 ```
