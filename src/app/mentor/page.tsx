@@ -19,6 +19,7 @@ import {
   StatCard,
 } from "@/components/platform/primitives";
 import { requireRole } from "@/lib/platform/guards";
+import { formatDate } from "@/lib/platform/dates";
 import {
   listMenteesForProgram,
   listMentorResourceProgress,
@@ -206,7 +207,7 @@ async function MentorPanel({
                     <ListRow
                       key={resource.id}
                       title={resource.title}
-                      meta={`Worth ${resource.maxScore} points${resource.deadline ? ` · due ${new Date(resource.deadline).toLocaleDateString()}` : ""}`}
+                      meta={`Worth ${resource.maxScore} points${resource.deadline ? ` · due ${formatDate(resource.deadline)}` : ""}`}
                       detail={
                         <span className="flex flex-wrap items-center gap-1.5">
                           <ResourceTypeChip type={resource.type} />

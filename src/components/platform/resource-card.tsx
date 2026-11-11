@@ -11,6 +11,7 @@ import {
 } from "@tabler/icons-react";
 
 import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/platform/dates";
 import { ResourceTypeChip } from "./primitives";
 import type { ResourceWithProgress } from "@/lib/platform/types";
 
@@ -79,7 +80,7 @@ export function ResourceCard({
                 )}
               >
                 <IconClock className="h-3.5 w-3.5" />
-                due {new Date(resource.deadline).toLocaleDateString()}
+                due {formatDate(resource.deadline)}
               </span>
             )}
           </p>

@@ -19,6 +19,7 @@ import {
   StatCard,
 } from "@/components/platform/primitives";
 import { requireRole } from "@/lib/platform/guards";
+import { formatDateTime } from "@/lib/platform/dates";
 import {
   listMentors,
   listMentorsForProgram,
@@ -250,7 +251,7 @@ async function AdminPanel({
                   >
                     <span className="font-semibold">{entry.action}</span>
                     <span className="shrink-0 text-[var(--color-iron-fixture)]">
-                      {new Date(entry.createdAt).toLocaleString()}
+                      {formatDateTime(entry.createdAt)}
                     </span>
                   </li>
                 ))}

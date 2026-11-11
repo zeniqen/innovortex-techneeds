@@ -1,4 +1,5 @@
 import { execute, queryOne } from "./db";
+import { newId } from "./credentials";
 import {
   assignMentorToProgram,
   assignMenteeToProgram,
@@ -7,6 +8,7 @@ import {
   createMentee,
   createProgram,
   createResource,
+  listResources,
 } from "./store";
 import type { ResourceType } from "./types";
 
@@ -137,27 +139,37 @@ function toResourceType(type: string | undefined): ResourceType {
 }
 
 /**
- * Moves a deadline into the future.
+ * Moves the deadlines into the future.
  *
- * The gap between the earliest deadline and each later one is kept, and
- * the earliest one is placed a week out, so the demo has work that is
- * open, work that is due soon and work that has passed.
+ * The deadlines on the live platform run from 2025 to 2026, and almost all
+ * of them are in the past, which would make every assignment look overdue
+ * the moment the platform came up.
+ *
+ * The whole schedule is squeezed into the next three months: the earliest
+ * deadline lands a week out and the latest lands about three months out,
+ * with the gaps between them kept in proportion. The order is preserved,
+ * so the work that was due first is still due first.
  */
 function shiftDeadlines(deadlines: (string | null)[]): (string | null)[] {
-  const dated = deadlines
+  const times = deadlines
     .map((value) => (value ? new Date(value).getTime() : Number.NaN))
     .filter((value) => Number.isFinite(value));
 
-  if (dated.length === 0) return deadlines;
+  if (times.length === 0) return deadlines;
 
-  const earliest = Math.min(...dated);
-  const anchor = Date.now() + 1000 * 60 * 60 * 24 * 7;
+  const earliest = Math.min(...times);
+  const latest = Math.max(...times);
+  const span = Math.max(1, latest - earliest);
+
+  const day = 1000 * 60 * 60 * 24;
+  const start = Date.now() + 7 * day;
+  const window = 83 * day;
 
   return deadlines.map((value) => {
     if (!value) return null;
     const time = new Date(value).getTime();
     if (!Number.isFinite(time)) return null;
-    return new Date(anchor + (time - earliest)).toISOString();
+    return new Date(start + ((time - earliest) / span) * window).toISOString();
   });
 }
 
@@ -304,9 +316,96 @@ export async function seedPlatform(): Promise<SeedReport> {
     resourceCount++;
   }
 
+  // --- the work behind the scores -----------------------------------------
+  // The live platform records each mentee's total but not which pieces of
+  // work earned it, so a copy of it would show people on the leaderboard
+  // with points and no finished work. The seed spreads each score across
+  // the mentee's own work, so the points, the badges and the level all
+  // line up with each other.
+  for (const mentee of sourceMentees) {
+    const total = mentee.totalScore ?? 0;
+    if (total <= 0) continue;
+
+    const local = menteeIds.get(mentee._id);
+    if (!local) continue;
+
+    const theirResources: { id: string; title: string; maxScore: number }[] = [];
+    for (const programId of mentee.programs ?? []) {
+      const localProgram = programIds.get(programId);
+      if (!localProgram) continue;
+      for (const resource of await listResources(localProgram)) {
+        theirResources.push({
+          id: resource.id,
+          title: resource.title,
+          maxScore: resource.maxScore,
+        });
+      }
+    }
+
+    if (theirResources.length === 0) continue;
+
+    // The smaller pieces of work are done first, the way a person works
+    // through a list, so the marks look like somebody's work rather than a
+    // uniform percentage of everything.
+    const ordered = [...theirResources].sort((a, b) => a.maxScore - b.maxScore);
+    let remaining = total;
+    let handed = 0;
+
+    for (const resource of ordered) {
+      if (remaining <= 0) break;
+
+      const score = Math.min(resource.maxScore, remaining);
+      if (score <= 0) continue;
+      remaining -= score;
+
+      await execute(
+        `INSERT INTO progress
+           (mentee_id, resource_id, status, score, submitted_at, graded_at, feedback)
+         VALUES (?, ?, 'graded', ?, ?, ?, '')
+         ON CONFLICT(mentee_id, resource_id) DO UPDATE SET
+           status = 'graded', score = excluded.score,
+           graded_at = excluded.graded_at`,
+        [
+          local,
+          resource.id,
+          score,
+          new Date().toISOString(),
+          new Date().toISOString(),
+        ],
+      );
+
+      await execute(
+        `INSERT INTO score_events (id, mentee_id, resource_id, delta, reason, created_at)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          newId("score"),
+          local,
+          resource.id,
+          score,
+          `Marked on the live platform: ${resource.title}`,
+          new Date().toISOString(),
+        ],
+      );
+
+      handed += score;
+    }
+
+    // The total is the sum of the marks that were given, so the points on
+    // the leaderboard and the marks on the profile are the same number.
+    await execute(`UPDATE mentees SET total_score = ? WHERE id = ?`, [
+      handed,
+      local,
+    ]);
+  }
+
   // --- a sign-in for each role --------------------------------------------
-  const demoMentor = sourceMentors[0];
-  const demoMentee = sourceMentees[0];
+  // The mentor and the mentee that are reported are the ones with the
+  // most going on, because those are the ones worth looking at.
+  const demoMentor = sourceMentors.find((m) => m.name === "Dr. Smith") ?? sourceMentors[0];
+
+  const demoMentee = [...sourceMentees].sort(
+    (a, b) => (b.totalScore ?? 0) - (a.totalScore ?? 0),
+  )[0];
 
   return {
     admin: { email: adminEmail, password: adminPassword },

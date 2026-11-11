@@ -1,4 +1,5 @@
 import { execute, query, queryOne, writeBatch } from "./db";
+import { currentTime } from "./clock";
 import {
   generateEnrollmentNumber,
   generatePassword,
@@ -583,7 +584,7 @@ export async function listMenteeResources(
     [menteeId],
   );
 
-  const now = Date.now();
+  const now = currentTime();
   const resources: ResourceWithProgress[] = [];
   for (const row of rows) {
     const progress = await getProgress(menteeId, row.id);

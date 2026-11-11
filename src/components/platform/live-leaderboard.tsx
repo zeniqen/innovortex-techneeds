@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { IconCrown, IconFlame, IconRefresh } from "@tabler/icons-react";
 
 import { cn } from "@/lib/utils";
+import { formatDateTime } from "@/lib/platform/dates";
 import type { LeaderboardRow } from "@/lib/platform/types";
 
 /**
@@ -41,7 +42,7 @@ export function LiveLeaderboard({
         if (cancelled) return;
 
         setRows(payload.entries);
-        setUpdatedAt(new Date().toLocaleTimeString());
+        setUpdatedAt(formatDateTime(new Date()).split(", ")[1] ?? "");
       } catch {
         // The list on screen is still the last good one.
       }
