@@ -31,6 +31,7 @@ export default function FloatingDockDemo() {
     {
       title: "Team",
       icon: <IconUsers className="h-full w-full" />,
+      href: "/team",
     },
     {
       title: "Leaderboard",
