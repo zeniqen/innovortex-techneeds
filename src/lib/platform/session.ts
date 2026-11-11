@@ -1,8 +1,8 @@
 import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 
 import { execute, queryOne } from "./db";
-import { newId } from "./credentials";
 import type { Role, SessionUser } from "./types";
 
 /**
@@ -118,8 +118,14 @@ export async function readSession(
  * The signed-in user, read from the request cookies.
  *
  * This is the one every server component uses to decide what to render.
+ *
+ * `connection()` marks the render as one that has to happen at request
+ * time. Without it the framework tries to prerender the panel, and the
+ * clock read while checking whether the session has expired makes that
+ * prerender impossible.
  */
 export async function currentUser(): Promise<SessionUser | null> {
+  await connection();
   const store = await cookies();
   return readSession(store.get(SESSION_COOKIE)?.value);
 }

@@ -1,5 +1,4 @@
-import { execute, query, queryOne } from "./db";
-import { hashPassword } from "./credentials";
+import { execute, queryOne } from "./db";
 import {
   assignMentorToProgram,
   assignMenteeToProgram,
@@ -96,7 +95,11 @@ interface SourceMentor {
   _id: string;
   name: string;
   email: string;
-  programs?: string[];
+  /**
+   * The programs this mentor is on. The live backend fills these in with
+   * the whole program rather than just its id.
+   */
+  programs?: ({ _id?: string } | string)[];
   createdAt?: string;
 }
 
@@ -104,6 +107,7 @@ interface SourceMentee {
   _id: string;
   name: string;
   enrollmentNumber: string;
+  /** The programs this mentee is on, as ids. */
   programs?: string[];
   totalScore?: number;
   streak?: number;
@@ -171,7 +175,6 @@ export async function seedPlatform(): Promise<SeedReport> {
     throw new Error("The platform already has programs; nothing was seeded.");
   }
 
-  const now = new Date().toISOString();
   const adminEmail = "admin@techneeds.test";
   const adminPassword = "admin-demo";
   await createAdmin({
@@ -182,8 +185,8 @@ export async function seedPlatform(): Promise<SeedReport> {
 
   let sourcePrograms: SourceProgram[] = [];
   let sourceMentors: SourceMentor[] = [];
-  let sourceMentees: SourceMentee[] = [];
-  let sourceResources: SourceResource[] = [];
+  const sourceMentees: SourceMentee[] = [];
+  const sourceResources: SourceResource[] = [];
   let warning: string | undefined;
 
   try {
@@ -241,10 +244,40 @@ export async function seedPlatform(): Promise<SeedReport> {
     });
     mentorIds.set(mentor._id, created.id);
 
-    for (const programId of mentor.programs ?? []) {
+    for (const program of mentor.programs ?? []) {
+      const programId = typeof program === "string" ? program : program._id;
+      if (!programId) continue;
       const local = programIds.get(programId);
       if (local) await assignMentorToProgram(local, created.id);
     }
+  }
+
+  // --- mentees -------------------------------------------------------------
+  // The mentees go in before the resources: publishing a resource assigns
+  // it to everybody on the program, so the other way round nothing would
+  // ever be assigned to anybody.
+  const menteeIds = new Map<string, string>();
+  for (const mentee of sourceMentees) {
+    const { mentee: created } = await createMentee({
+      name: mentee.name,
+      interests: [],
+      password: DEMO_PASSWORD,
+      // The enrollment number the live platform already knows this person
+      // by, so the copy is recognisable and the sign-in still works.
+      enrollmentNumber: mentee.enrollmentNumber?.trim() || undefined,
+    });
+    menteeIds.set(mentee._id, created.id);
+
+    for (const programId of mentee.programs ?? []) {
+      const local = programIds.get(programId);
+      if (local) await assignMenteeToProgram(local, created.id);
+    }
+
+    // The live scores carry over, so the leaderboard is not empty.
+    await execute(
+      `UPDATE mentees SET total_score = ?, streak = ? WHERE id = ?`,
+      [mentee.totalScore ?? 0, mentee.streak ?? 0, created.id],
+    );
   }
 
   // --- resources -----------------------------------------------------------
@@ -269,31 +302,6 @@ export async function seedPlatform(): Promise<SeedReport> {
       createdBy: "",
     });
     resourceCount++;
-  }
-
-  // --- mentees -------------------------------------------------------------
-  const menteeIds = new Map<string, string>();
-  for (const mentee of sourceMentees) {
-    const { mentee: created } = await createMentee({
-      name: mentee.name,
-      interests: [],
-      password: DEMO_PASSWORD,
-      // The enrollment number the live platform already knows this person
-      // by, so the copy is recognisable and the sign-in still works.
-      enrollmentNumber: mentee.enrollmentNumber?.trim() || undefined,
-    });
-    menteeIds.set(mentee._id, created.id);
-
-    for (const programId of mentee.programs ?? []) {
-      const local = programIds.get(programId);
-      if (local) await assignMenteeToProgram(local, created.id);
-    }
-
-    // The live scores carry over, so the leaderboard is not empty.
-    await execute(
-      `UPDATE mentees SET total_score = ?, streak = ? WHERE id = ?`,
-      [mentee.totalScore ?? 0, mentee.streak ?? 0, created.id],
-    );
   }
 
   // --- a sign-in for each role --------------------------------------------

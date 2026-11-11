@@ -1,9 +1,4 @@
-import {
-  adminCount,
-  createAdmin,
-  programCount,
-  resetPlatform,
-} from "@/lib/platform/store";
+import { createAdmin, programCount, resetPlatform } from "@/lib/platform/store";
 import { seedPlatform } from "@/lib/platform/seed";
 import { currentUser } from "@/lib/platform/session";
 import { generatePassword } from "@/lib/platform/credentials";

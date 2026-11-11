@@ -144,4 +144,11 @@ export interface SessionUser {
 export interface ResourceWithProgress extends Resource {
   progress: Progress | null;
   submission: Submission | null;
+  /**
+   * Whether the deadline has passed and the work has not been marked.
+   *
+   * Worked out where the data is assembled rather than in the component,
+   * so the clock is read once per request instead of once per render.
+   */
+  overdue: boolean;
 }

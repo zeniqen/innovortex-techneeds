@@ -1,5 +1,4 @@
 import { execute, query, queryOne, writeBatch } from "./db";
-import type { InValue } from "@libsql/client";
 import {
   generateEnrollmentNumber,
   generatePassword,
@@ -584,12 +583,18 @@ export async function listMenteeResources(
     [menteeId],
   );
 
+  const now = Date.now();
   const resources: ResourceWithProgress[] = [];
   for (const row of rows) {
+    const progress = await getProgress(menteeId, row.id);
     resources.push({
       ...toResource(row),
-      progress: await getProgress(menteeId, row.id),
+      progress,
       submission: await getSubmission(menteeId, row.id),
+      overdue:
+        row.deadline !== null &&
+        new Date(row.deadline).getTime() < now &&
+        progress?.status !== "graded",
     });
   }
   return resources;
