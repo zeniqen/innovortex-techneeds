@@ -20,14 +20,15 @@ which is created the first time the app runs:
 npm run dev
 ```
 
-Then open <http://localhost:3000/admin>. The platform is empty, so the
-panel offers to set it up. That creates the first admin and copies the
-live platform in: 17 programs, 26 mentors, 31 mentees and 31 resources.
+Then open <http://localhost:3000/login>. The platform is empty, so the
+sign-in page offers to set it up instead. That creates the first admin and
+copies the live platform in: 17 programs, 26 mentors, 31 mentees and 31
+resources. It takes about twenty seconds.
 
 The setup screen tells you the credentials it made. The seeded accounts
 all share one password, `techneeds-demo`, and the admin is `admin-demo`.
 
-Setting the platform up again, from inside the admin panel, is allowed and
+Setting the platform up again, from the same screen, is allowed and
 throws the old data away first.
 
 ## Where the data comes from

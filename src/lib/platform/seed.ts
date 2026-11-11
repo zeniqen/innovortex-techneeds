@@ -68,6 +68,11 @@ export interface SeedReport {
 
 /**
  * Fetches a list from the live backend.
+ *
+ * A payload that is not a list is an error rather than an empty list: the
+ * seed has a lot of work to do after this, and a backend that answered
+ * with something unexpected should say so rather than quietly leaving the
+ * platform empty.
  */
 async function fetchFromSource<T>(path: string): Promise<T[]> {
   const controller = new AbortController();
@@ -79,8 +84,14 @@ async function fetchFromSource<T>(path: string): Promise<T[]> {
       cache: "no-store",
     });
     if (!response.ok) throw new Error(`${path} returned ${response.status}`);
+
     const payload: unknown = await response.json();
-    return Array.isArray(payload) ? (payload as T[]) : [];
+    if (!Array.isArray(payload)) {
+      throw new Error(
+        `${path} did not return a list (${typeof payload})`,
+      );
+    }
+    return payload as T[];
   } finally {
     clearTimeout(timer);
   }

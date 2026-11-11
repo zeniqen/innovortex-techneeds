@@ -4,7 +4,9 @@ import { Suspense } from "react";
 import { IconArrowLeft } from "@tabler/icons-react";
 
 import { SignInForm } from "@/components/platform/sign-in-form";
+import { SetupCard } from "@/components/platform/setup-card";
 import { optionalUser, panelPath } from "@/lib/platform/guards";
+import { adminCount } from "@/lib/platform/store";
 
 export const metadata: Metadata = {
   title: "Sign in | TechNeeds IGDTUW",
@@ -52,6 +54,10 @@ async function SignInBody() {
     );
   }
 
+  // Until there is an admin there is no way in, and the admin panel needs
+  // an admin, so the setup lives here on the sign-in page.
+  const needsSetup = (await adminCount()) === 0;
+
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-12">
       <Link
@@ -68,7 +74,11 @@ async function SignInBody() {
         their mentor gave them.
       </p>
 
-      <SignInForm />
+      {needsSetup ? (
+        <SetupCard />
+      ) : (
+        <SignInForm />
+      )}
     </div>
   );
 }

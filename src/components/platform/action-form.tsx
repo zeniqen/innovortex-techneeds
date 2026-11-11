@@ -82,10 +82,13 @@ export function ActionForm({
     const data = new FormData(form);
     const body: Record<string, string> = {};
 
-    for (const field of fields) {
-      const value = data.get(field.name);
+    // Everything in the form is sent, not only the declared fields. The
+    // forms carry hidden inputs - the program a resource belongs to, the
+    // piece of work being marked - and those are children rather than
+    // fields, so reading only the fields would quietly drop them.
+    for (const [name, value] of data.entries()) {
       if (typeof value === "string" && value !== "") {
-        body[field.name] = value;
+        body[name] = value;
       }
     }
 
