@@ -56,6 +56,7 @@
 
   /* Animation used by the aurora background. */
   --animate-aurora: aurora 8s linear infinite;
+  --animate-cell-ripple: cell-ripple var(--duration, 600ms) ease-out var(--delay, 0ms);
 }
 
 body {
@@ -87,6 +88,22 @@ body {
   background-image: 
     linear-gradient(to right, rgba(192, 191, 189, 0.25) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(192, 191, 189, 0.25) 1px, transparent 1px);
+}
+
+/* The ripple that travels across the background grid. */
+@keyframes cell-ripple {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
 }
 
 /* The drifting gradient behind the aurora background. */
@@ -132,6 +149,16 @@ body {
     #7c3aed 0%,
     var(--color-plum-bright) 55%,
     #5b21b6 100%
+  );
+}
+
+/* The techboard card, in the same neutral wash the rest of the site uses. */
+.bg-techboard-card {
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--color-night-white) 70%, var(--color-emptiness)) 0%,
+    var(--color-emptiness) 50%,
+    color-mix(in oklab, var(--color-night-white) 70%, var(--color-emptiness)) 100%
   );
 }
 

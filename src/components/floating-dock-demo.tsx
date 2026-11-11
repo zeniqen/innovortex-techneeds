@@ -24,9 +24,9 @@ export default function FloatingDockDemo() {
       href: isHome ? "#home" : "/",
     },
     {
-      // No href -> renders as a button that does not navigate anywhere yet.
       title: "Techboard",
       icon: <IconCpu className="h-full w-full" />,
+      href: "/techboard",
     },
     {
       title: "Team",
