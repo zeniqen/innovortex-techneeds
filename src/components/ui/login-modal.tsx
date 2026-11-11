@@ -18,16 +18,18 @@ const CONFIG = {
     subtitle: "Enter your credentials to access your dashboard",
     identifierLabel: "Enrollment Number",
     identifierType: "text",
-    identifierKey: "enrollmentNumber",
-    endpoint: "https://tn-backend-1.onrender.com/api/m/login",
+    endpoint: "/api/platform/login",
+    role: "mentee",
+    panel: "/mentee",
   },
   mentor: {
     title: "Mentor Login",
     subtitle: "Enter your credentials to access mentor dashboard",
     identifierLabel: "Email",
     identifierType: "email",
-    identifierKey: "email",
-    endpoint: "https://tn-backend-1.onrender.com/api/mentors/login",
+    endpoint: "/api/platform/login",
+    role: "mentor",
+    panel: "/mentor",
   },
 } as const;
 
@@ -111,7 +113,8 @@ export function LoginModal({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          [config.identifierKey]: identifier,
+          role: config.role,
+          identifier,
           password,
         }),
       });
@@ -127,6 +130,9 @@ export function LoginModal({
       }
 
       setStatus("success");
+      // The session is a cookie now, so the panel picks it up on the way
+      // in and there is no token to keep.
+      window.location.assign(config.panel);
     } catch {
       setStatus("error");
       setMessage("Could not reach the sign-in service. Try again.");
@@ -188,8 +194,8 @@ export function LoginModal({
                   You are signed in
                 </h2>
                 <p className="text-sm text-[var(--color-iron-fixture)]">
-                  Welcome back{identifier ? `, ${identifier}` : ""}. Your
-                  dashboard is not part of this site yet.
+                  Welcome back{identifier ? `, ${identifier}` : ""}. Taking
+                  you to your dashboard.
                 </p>
                 <button
                   type="button"

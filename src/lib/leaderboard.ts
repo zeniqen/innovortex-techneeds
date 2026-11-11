@@ -31,6 +31,13 @@ export const LEADERBOARD_ENDPOINT =
 export async function fetchLeaderboard(
   signal?: AbortSignal,
 ): Promise<LeaderboardEntry[]> {
+  // The platform's own board comes first: it is where the marks are
+  // actually given, so a mentee who has just been marked appears on the
+  // board straight away. The live platform is the fallback for a site
+  // that has not been set up yet.
+  const local = await fetchLocalLeaderboard(signal);
+  if (local && local.length > 0) return local;
+
   const res = await fetch(LEADERBOARD_ENDPOINT, {
     signal,
     cache: "no-store",
@@ -64,6 +71,52 @@ export async function fetchLeaderboard(
     })
     .filter((entry): entry is LeaderboardEntry => entry !== null)
     .sort((a, b) => a.rank - b.rank);
+}
+
+/**
+ * The board from this project's own platform.
+ *
+ * Returns null when the platform is not set up, which is the signal to
+ * fall back to the live one.
+ */
+async function fetchLocalLeaderboard(
+  signal?: AbortSignal,
+): Promise<LeaderboardEntry[] | null> {
+  try {
+    const res = await fetch("/api/platform/leaderboard", {
+      signal,
+      cache: "no-store",
+    });
+
+    if (!res.ok) return null;
+
+    const payload: unknown = await res.json();
+    if (typeof payload !== "object" || payload === null) return null;
+
+    const entries = (payload as { entries?: unknown }).entries;
+    if (!Array.isArray(entries)) return null;
+
+    return entries
+      .map((row): LeaderboardEntry | null => {
+        const entry = row as Partial<LeaderboardEntry>;
+        if (typeof entry.rank !== "number" || typeof entry.name !== "string") {
+          return null;
+        }
+        return {
+          rank: entry.rank,
+          name: entry.name.trim(),
+          totalScore:
+            typeof entry.totalScore === "number" ? entry.totalScore : 0,
+          streak: typeof entry.streak === "number" ? entry.streak : 0,
+        };
+      })
+      .filter((entry): entry is LeaderboardEntry => entry !== null)
+      .sort((a, b) => a.rank - b.rank);
+  } catch {
+    // The platform is not reachable, or the request was aborted. Either
+    // way, the live board is a better answer than nothing.
+    return null;
+  }
 }
 
 /**

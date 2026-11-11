@@ -1,6 +1,7 @@
-import { describeDatabase } from "@/lib/platform/db";
+import { connection } from "next/server";
+
+import { describeDatabase, queryOne } from "@/lib/platform/db";
 import { adminCount } from "@/lib/platform/store";
-import { queryOne } from "@/lib/platform/db";
 
 /**
  * What state the platform is in.
@@ -9,6 +10,10 @@ import { queryOne } from "@/lib/platform/db";
  * the panel itself.
  */
 export async function GET() {
+  // The counts change as people are added, so this is answered at request
+  // time rather than baked into the build.
+  await connection();
+
   const admins = await adminCount();
 
   const counts = await queryOne<{
