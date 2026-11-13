@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import Footer from "@/components/footer";
 import FloatingDockDemo from "@/components/floating-dock-demo";
@@ -66,6 +66,13 @@ export default async function Page({
 async function ProfileBody({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
   const { id } = await params;
+
+  // An admin has no profile of their own - only mentors and mentees do -
+  // so their own profile link takes them to their dashboard instead. They
+  // can still open anybody else's profile.
+  if (user.role === "admin" && (id === "me" || id === user.id)) {
+    redirect("/techboard");
+  }
 
   const now = currentTime();
   const rows = await leaderboard(50);
