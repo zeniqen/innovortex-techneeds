@@ -90,6 +90,7 @@ export function RemoveMenteeButton({
     <RemoveButton
       action={`/api/platform/mentor/mentees/${menteeId}?programId=${programId}`}
       label="Remove"
+      question={`Remove ${name}?`}
       title={`Take ${name} off this program`}
       icon={<IconTrash className="h-3.5 w-3.5" />}
     />
@@ -193,7 +194,9 @@ export function GradeForm({
       label: `Score (out of ${maxScore})`,
       type: "number",
       required: true,
-      defaultValue: 0,
+      // Empty rather than 0, so a stray Enter cannot save a zero.
+      min: 0,
+      max: maxScore,
       width: "half",
     },
     {

@@ -10,6 +10,7 @@ import type {
   LeaderboardRow,
   Mentor,
   Mentee,
+  MentorProgressEntry,
   Progress,
   ProgressStatus,
   Program,
@@ -592,18 +593,25 @@ export async function listMentorResourceProgress(
   programId: string,
 ): Promise<{
   resource: Resource;
-  entries: { mentee: Mentee; progress: Progress | null }[];
+  entries: MentorProgressEntry[];
 }[]> {
   const resources = await listResources(programId);
   const mentees = await listMenteesForProgram(programId);
   const result = [];
 
   for (const resource of resources) {
-    const entries = [] as { mentee: Mentee; progress: Progress | null }[];
+    const entries: MentorProgressEntry[] = [];
     for (const mentee of mentees) {
+      const progress = await getProgress(mentee.id, resource.id);
       entries.push({
         mentee,
-        progress: await getProgress(mentee.id, resource.id),
+        progress,
+        // Only work that has been handed in is worth the extra read; the
+        // mentor needs it to mark, and nothing else here shows it.
+        submission:
+          progress?.status === "submitted" || progress?.status === "graded"
+            ? await getSubmission(mentee.id, resource.id)
+            : null,
       });
     }
     result.push({ resource, entries });

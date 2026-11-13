@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { IconCheck, IconCopy, IconKey } from "@tabler/icons-react";
 
+import { useHoldModal } from "./modal";
+
 /**
  * A generated credential, shown once.
  *
@@ -23,8 +25,14 @@ export function CredentialCard({
   onDismiss?: () => void;
 }) {
   const [copied, setCopied] = useState<string | null>(null);
+  const showing = Boolean(enrollmentNumber || password || mentorEmail);
 
-  if (!enrollmentNumber && !password && !mentorEmail) return null;
+  // The modal this sits in stays open until the person says they have
+  // saved these: an Escape or a stray click must not lose them.
+  const holding = showing && Boolean(onDismiss);
+  useHoldModal(holding);
+
+  if (!showing) return null;
 
   const copy = async (value: string, key: string) => {
     try {
@@ -38,7 +46,10 @@ export function CredentialCard({
   };
 
   return (
-    <div className="tn-enter-pop rounded-2xl border border-[var(--color-gain)]/30 bg-[var(--color-gain)]/5 p-5">
+    <div
+      data-hold-modal={holding ? "" : undefined}
+      className="tn-enter-pop rounded-2xl border border-[var(--color-gain)]/30 bg-[var(--color-gain)]/5 p-5"
+    >
       <p className="flex items-center gap-2 text-sm font-bold text-[var(--color-caviar)]">
         <IconKey className="h-4 w-4" />
         Copy these now
@@ -79,9 +90,10 @@ export function CredentialCard({
         <button
           type="button"
           onClick={onDismiss}
-          className="mt-4 text-xs font-bold text-[var(--color-iron-fixture)] underline underline-offset-4 hover:text-[var(--color-caviar)]"
+          className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-caviar)] px-4 py-2.5 text-xs font-bold text-[var(--color-emptiness)] tn-press hover:bg-[var(--color-iron-fixture)]"
         >
-          I have copied them
+          <IconCheck className="h-3.5 w-3.5" />
+          I&apos;ve saved these
         </button>
       )}
     </div>
@@ -105,7 +117,8 @@ function Credential({
         <p className="text-[0.68rem] font-semibold uppercase tracking-wide text-[var(--color-iron-fixture)]">
           {label}
         </p>
-        <p className="mt-0.5 truncate font-mono text-sm">{value}</p>
+        {/* Never cut short: a credential missing its end is no credential. */}
+        <p className="mt-0.5 break-all font-mono text-sm">{value}</p>
       </div>
       <button
         type="button"

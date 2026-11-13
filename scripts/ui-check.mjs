@@ -544,6 +544,21 @@ console.log("\nADMIN: DELETING AND ASSIGNING");
     button.click();
     return { ok: true };
   })()`);
+  await sleep(500);
+  // Removing takes two presses: the first arms it and asks
+  // "Take <program> off?", the second does it.
+  const confirmedOff = removed.ok
+    ? await b.ev(`(function(){
+        const button = [...document.querySelectorAll('button')].find(b => b.textContent.trim().startsWith('Take '));
+        if (!button) return { ok: false, why: 'no confirm button' };
+        button.click();
+        return { ok: true };
+      })()`)
+    : removed;
+  if (!confirmedOff.ok) {
+    removed.ok = false;
+    removed.why = confirmedOff.why;
+  }
   await sleep(2500);
   const offIt = await b.ev(
     `document.body.textContent.includes("Not on any program yet")`,

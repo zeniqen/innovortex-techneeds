@@ -22,6 +22,9 @@ export type FieldSpec =
       required?: boolean;
       defaultValue?: string | number;
       hint?: string;
+      /** The bounds of a number field. */
+      min?: number;
+      max?: number;
       /** How wide the field is, as a span of the grid. */
       width?: "full" | "half";
     }
@@ -159,51 +162,102 @@ export function ActionForm({
 }
 
 /**
- * A button that removes something.
+ * A button that removes something, with a second press to be sure.
  *
  * Removing is a single call with nothing in the body, so it does not need
- * the whole form machinery.
+ * the whole form machinery. A stray click should not take a mentee off a
+ * program, so the first press arms the button and the second one does
+ * it; Cancel puts it back.
  */
 export function RemoveButton({
   action,
   label,
+  question,
   title,
   icon,
 }: {
   action: string;
   label: string;
+  /** What the armed button says, e.g. "Remove Asha?". */
+  question: string;
   title?: string;
   icon?: ReactNode;
 }) {
   const router = useRouter();
+  const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const submit = async () => {
     if (busy) return;
     setBusy(true);
+    setFailed(false);
 
     try {
-      await fetch(action, { method: "DELETE" });
+      const response = await fetch(action, { method: "DELETE" });
+      if (!response.ok) throw new Error(String(response.status));
       router.refresh();
     } catch {
-      // The list is unchanged either way; the person can try again.
+      // The list is unchanged; say so, so the person knows to try again.
+      setFailed(true);
     }
 
     setBusy(false);
+    setAsking(false);
   };
 
+  const error = failed && (
+    <span role="alert" className="text-[0.7rem] font-semibold text-[var(--color-loss)]">
+      Couldn&apos;t remove that. Try again.
+    </span>
+  );
+
+  if (!asking) {
+    return (
+      <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
+        {error}
+        <button
+          type="button"
+          onClick={() => {
+            setFailed(false);
+            setAsking(true);
+          }}
+          title={title}
+          aria-label={title ?? label}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-spotted-dove)] px-2.5 py-1.5 text-[0.7rem] font-bold text-[var(--color-iron-fixture)] transition-colors duration-150 hover:border-[var(--color-loss)] hover:text-[var(--color-loss)]"
+        >
+          {icon}
+          {label}
+        </button>
+      </span>
+    );
+  }
+
   return (
-    <button
-      type="button"
-      onClick={submit}
-      disabled={busy}
-      title={title}
-      aria-label={title ?? label}
-      className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-spotted-dove)] px-2.5 py-1.5 text-[0.7rem] font-bold text-[var(--color-iron-fixture)] transition-colors duration-150 hover:border-[var(--color-loss)] hover:text-[var(--color-loss)] disabled:opacity-60"
-    >
-      {busy ? <IconLoader2 className="h-3.5 w-3.5 animate-spin" /> : icon}
-      {label}
-    </button>
+    <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
+      <button
+        type="button"
+        disabled={busy}
+        onClick={submit}
+        title={title}
+        className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-loss)] px-2.5 py-1.5 text-[0.7rem] font-bold text-white transition-colors duration-150 hover:bg-[var(--color-loss)]/90 disabled:opacity-60"
+      >
+        {busy ? (
+          <IconLoader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <IconTrash className="h-3.5 w-3.5" />
+        )}
+        {question}
+      </button>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => setAsking(false)}
+        className="rounded-lg border border-[var(--color-spotted-dove)] px-2.5 py-1.5 text-[0.7rem] font-bold text-[var(--color-iron-fixture)] transition-colors duration-150 hover:bg-[var(--color-night-white)] disabled:opacity-60"
+      >
+        Cancel
+      </button>
+    </span>
   );
 }
 
@@ -301,7 +355,8 @@ export function DangerButton({
   );
 }
 
-function Field({ field }: { field: FieldSpec }) {  const id = `field-${field.name}`;
+function Field({ field }: { field: FieldSpec }) {
+  const id = `field-${field.name}`;
   const width = field.width === "half" ? "sm:col-span-1" : "sm:col-span-2";
   const common =
     "w-full rounded-xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] px-3.5 py-2.5 text-sm text-[var(--color-caviar)] transition-colors placeholder:text-[var(--color-stone-haze)] focus:border-[var(--color-caviar)] focus:outline-none focus:ring-2 focus:ring-[var(--color-caviar)]/15";
@@ -351,6 +406,8 @@ function Field({ field }: { field: FieldSpec }) {  const id = `field-${field.nam
           required={field.required}
           placeholder={field.placeholder}
           defaultValue={field.defaultValue}
+          min={field.min}
+          max={field.max}
           className={common}
         />
       )}

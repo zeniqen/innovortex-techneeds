@@ -143,6 +143,7 @@ export function RemoveMentorButton({
     <RemoveButton
       action={`/api/platform/admin/programs/${programId}/mentors/${mentorId}`}
       label="Remove"
+      question={`Remove ${name}?`}
       title={`Take ${name} off this program`}
       icon={<IconTrash className="h-3.5 w-3.5" />}
     />
@@ -375,6 +376,7 @@ export function RemoveProgramButton({
     <RemoveButton
       action={`/api/platform/admin/mentors/${mentorId}/programs/${programId}`}
       label="Remove"
+      question={`Take ${programName} off?`}
       title={`Take ${programName} off this mentor`}
       icon={<IconTrash className="h-3.5 w-3.5" />}
     />

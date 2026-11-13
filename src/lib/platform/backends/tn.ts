@@ -7,6 +7,7 @@ import { upstreamToken } from "../upstream-token";
 import type {
   LeaderboardRow,
   Mentee,
+  MentorProgressEntry,
   Mentor,
   Progress,
   Program,
@@ -525,15 +526,7 @@ export async function listMenteeResources(
       resources.push({
         ...resource,
         progress,
-        submission: completion
-          ? {
-              id: `${menteeId}-${resource.id}`,
-              menteeId,
-              resourceId: resource.id,
-              body: completion.githubLink ?? completion.description ?? "",
-              submittedAt: completion.submittedOn ?? "",
-            }
-          : null,
+        submission: toSubmission(menteeId, resource.id, completion),
         overdue:
           resource.deadline !== null &&
           resource.deadline !== undefined &&
@@ -551,7 +544,7 @@ export async function listMentorResourceProgress(
   programId: string,
 ): Promise<{
   resource: Resource;
-  entries: { mentee: Mentee; progress: Progress | null }[];
+  entries: MentorProgressEntry[];
 }[]> {
   const resources = await listResources(programId);
   const mentees = await listMenteesForProgram(programId);
@@ -575,6 +568,7 @@ export async function listMentorResourceProgress(
       entries.push({
         mentee: mentees[index],
         progress: toProgress(mentees[index].id, resource.id, completion),
+        submission: toSubmission(mentees[index].id, resource.id, completion),
       });
     }
     result.push({ resource, entries });
@@ -591,13 +585,26 @@ export async function getSubmission(
   const completion = mentee?.completedResources?.find(
     (entry) => idOf(entry.resource) === resourceId,
   );
+  return toSubmission(menteeId, resourceId, completion);
+}
+
+/**
+ * What a mentee handed in, read off their completion entry. The Express
+ * backend keeps a project's link on the entry itself; a quiz or a video
+ * is recorded as done with nothing handed in.
+ */
+function toSubmission(
+  menteeId: string,
+  resourceId: string,
+  completion: TnCompletion | undefined,
+): Submission | null {
   if (!completion) return null;
   return {
     id: `${menteeId}-${resourceId}`,
     menteeId,
     resourceId,
     body: completion.githubLink ?? completion.description ?? "",
-    submittedAt: completion.submittedOn ?? "",
+    submittedAt: completion.submittedOn ?? completion.completedOn ?? "",
   };
 }
 

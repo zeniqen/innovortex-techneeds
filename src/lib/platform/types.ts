@@ -105,6 +105,17 @@ export interface Submission {
   submittedAt: string;
 }
 
+/**
+ * One mentee's standing on one resource, as the mentor marking it sees it:
+ * where they are, and what they handed in.
+ */
+export interface MentorProgressEntry {
+  mentee: Mentee;
+  progress: Progress | null;
+  /** What was handed in, or null when nothing has been. */
+  submission: Submission | null;
+}
+
 export interface ScoreEvent {
   id: string;
   menteeId: string;

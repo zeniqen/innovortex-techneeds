@@ -1,6 +1,7 @@
 import type {
   LeaderboardRow,
   Mentee,
+  MentorProgressEntry,
   Mentor,
   Progress,
   Program,
@@ -118,7 +119,7 @@ export interface PlatformStore {
     programId: string,
   ): Promise<{
     resource: Resource;
-    entries: { mentee: Mentee; progress: Progress | null }[];
+    entries: MentorProgressEntry[];
   }[]>;
   getSubmission(
     menteeId: string,

@@ -17,14 +17,14 @@ import {
   ResourceTypeChip,
   StatCard,
 } from "@/components/platform/primitives";
-import { formatDate } from "@/lib/platform/dates";
+import { formatDate, formatDateTime } from "@/lib/platform/dates";
 import {
   listMenteesForProgram,
   listMentorResourceProgress,
   listPrograms,
   listResources,
 } from "@/lib/platform/store";
-import type { SessionUser } from "@/lib/platform/types";
+import type { SessionUser, Submission } from "@/lib/platform/types";
 
 /**
  * The mentor panel.
@@ -74,7 +74,11 @@ export async function MentorPanel({
     const awaiting = progress.flatMap((entry) =>
       entry.entries
         .filter((item) => item.progress?.status === "submitted")
-        .map((item) => ({ resource: entry.resource, mentee: item.mentee })),
+        .map((item) => ({
+          resource: entry.resource,
+          mentee: item.mentee,
+          submission: item.submission,
+        })),
     );
 
     const totalScore = mentees.reduce((sum, mentee) => sum + mentee.totalScore, 0);
@@ -159,6 +163,7 @@ export async function MentorPanel({
                       {entry.resource.title} · worth {entry.resource.maxScore}{" "}
                       points
                     </p>
+                    <HandedIn submission={entry.submission} />
                     <GradeForm
                       resourceId={entry.resource.id}
                       menteeId={entry.mentee.id}
@@ -256,4 +261,65 @@ export async function MentorPanel({
       </PanelShell>
     );
 
+}
+
+/**
+ * What a mentee handed in, shown above the mark so the mentor reads the
+ * work before scoring it. Links open in a new tab; anything else keeps
+ * its line breaks.
+ */
+function HandedIn({ submission }: { submission: Submission | null }) {
+  const body = submission?.body.trim() ?? "";
+
+  return (
+    <div className="mb-4 rounded-lg bg-[var(--color-night-white)] px-3 py-2.5">
+      <p className="text-[0.68rem] font-semibold uppercase tracking-wide text-[var(--color-iron-fixture)]">
+        Handed in
+        {submission?.submittedAt && (
+          <span className="normal-case tracking-normal">
+            {" "}
+            · {formatDateTime(submission.submittedAt)}
+          </span>
+        )}
+      </p>
+      {!submission ? (
+        <p className="mt-1 text-xs text-[var(--color-iron-fixture)]">
+          The work isn&apos;t available here.
+        </p>
+      ) : body === "" ? (
+        <p className="mt-1 text-xs text-[var(--color-iron-fixture)]">
+          Marked as done, with nothing attached.
+        </p>
+      ) : (
+        <p className="mt-1 max-h-48 overflow-y-auto whitespace-pre-wrap break-words text-sm">
+          <LinkedText text={body} />
+        </p>
+      )}
+    </div>
+  );
+}
+
+// A trailing full stop or bracket is read as the sentence's, not the link's.
+const URL_PATTERN = /(https?:\/\/[^\s<>"']*[^\s<>"'.,;:!?)\]])/g;
+
+/**
+ * Text with every http(s) address in it made into a link.
+ */
+function LinkedText({ text }: { text: string }) {
+  // split() with a capturing group keeps the matches, at the odd indexes.
+  return text.split(URL_PATTERN).map((part, index) =>
+    index % 2 === 1 ? (
+      <a
+        key={index}
+        href={part}
+        target="_blank"
+        rel="noreferrer noopener"
+        className="break-all font-semibold underline underline-offset-4 hover:text-[var(--color-iron-fixture)]"
+      >
+        {part}
+      </a>
+    ) : (
+      part
+    ),
+  );
 }
