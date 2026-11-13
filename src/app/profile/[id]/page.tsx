@@ -93,12 +93,19 @@ async function ProfileBody({ params }: { params: Promise<{ id: string }> }) {
       rows,
     );
 
+    // Only the mentor's own mentees, at their place on the whole board.
+    // A row is matched on the id, or on the name for the tn backend, which
+    // sends the name in place of an id.
+    const theirs = new Set(
+      (input.mentees ?? []).flatMap((mentee) => [mentee.id, mentee.name]),
+    );
+
     return (
       <ProfileView
         profile={buildProfile(input, now)}
         charts={buildProfileCharts(input)}
         role="mentor"
-        leaderboard={rows}
+        leaderboard={rows.filter((row) => theirs.has(row.id))}
         isSelf={user.id === mentor.id}
       />
     );
@@ -159,6 +166,7 @@ async function menteeInput(
     status: resource.progress?.status ?? "assigned",
     score: resource.progress?.score ?? 0,
     overdue: resource.overdue,
+    url: resource.url,
   }));
 
   return {
@@ -170,7 +178,9 @@ async function menteeInput(
     streak,
     programs: programs.filter((program) => programIds.includes(program.id)),
     resources: resourceList,
-    rank: rows.find((row) => row.id === id)?.rank ?? null,
+    // The tn backend sends no id with a leaderboard row and uses the name
+    // in its place, so the name is the fallback.
+    rank: rows.find((row) => row.id === id || row.id === name)?.rank ?? null,
     fieldSize: rows.length,
     scoreHistory: events.map((event) => ({
       resourceId: event.resourceId,
@@ -182,6 +192,9 @@ async function menteeInput(
 
 /**
  * Gathers what is known about a mentor.
+ *
+ * A mentee on two of the mentor's programs is counted once, and only the
+ * work on the mentor's own programs counts towards them.
  */
 async function mentorInput(
   id: string,
@@ -192,29 +205,44 @@ async function mentorInput(
   rows: Awaited<ReturnType<typeof leaderboard>>,
 ): Promise<ProfileInput> {
   const resourceList: ProfileResource[] = [];
-  const mentees: ProfileMentee[] = [];
+  const ownPrograms = new Set(programIds);
+
+  // Each mentee once, with what they have done on this mentor's programs.
+  const people = new Map<
+    string,
+    Awaited<ReturnType<typeof listMenteesForProgram>>[number]
+  >();
+  for (const list of await Promise.all(programIds.map(listMenteesForProgram))) {
+    for (const person of list) {
+      if (!people.has(person.id)) people.set(person.id, person);
+    }
+  }
+
+  const everyone = await Promise.all(
+    [...people.values()].map(async (person) => ({
+      person,
+      resources: (await listMenteeResources(person.id)).filter((resource) =>
+        ownPrograms.has(resource.programId),
+      ),
+    })),
+  );
 
   for (const programId of programIds) {
-    const people = await listMenteesForProgram(programId);
-
-    // What each mentee has done with each resource. The mentor's view of
-    // a resource is the sum of it across their mentees.
-    const perMentee = await Promise.all(
-      people.map(async (person) => ({
-        person,
-        resources: await listMenteeResources(person.id),
-      })),
-    );
-
     for (const resource of await listResources(programId)) {
       let submitted = 0;
       let overdue = 0;
+      let started = 0;
 
-      for (const { resources: their } of perMentee) {
+      for (const { resources: their } of everyone) {
         const theirs = their.find((entry) => entry.id === resource.id);
         if (!theirs) continue;
-        if (theirs.progress?.status === "submitted") submitted++;
-        if (theirs.overdue) overdue++;
+        const status = theirs.progress?.status ?? "assigned";
+        if (status === "submitted") submitted++;
+        if (status !== "assigned") started++;
+        // Handed in but not yet marked is waiting on the mentor, not late.
+        if (theirs.overdue && (status === "assigned" || status === "in_progress")) {
+          overdue++;
+        }
       }
 
       resourceList.push({
@@ -231,22 +259,28 @@ async function mentorInput(
         status: submitted > 0 ? "submitted" : "assigned",
         score: 0,
         overdue: overdue > 0,
-      });
-    }
-
-    for (const { person, resources: their } of perMentee) {
-      mentees.push({
-        id: person.id,
-        name: person.name,
-        totalScore: person.totalScore,
-        completed: their.filter(
-          (resource) => resource.progress?.status === "graded",
-        ).length,
-        assigned: their.length,
-        overdue: their.filter((resource) => resource.overdue).length,
+        url: resource.url,
+        submittedCount: submitted,
+        overdueCount: overdue,
+        startedCount: started,
       });
     }
   }
+
+  const mentees: ProfileMentee[] = everyone.map(({ person, resources: their }) => ({
+    id: person.id,
+    name: person.name,
+    totalScore: person.totalScore,
+    completed: their.filter((resource) => resource.progress?.status === "graded")
+      .length,
+    assigned: their.length,
+    overdue: their.filter((resource) => {
+      const status = resource.progress?.status ?? "assigned";
+      return (
+        resource.overdue && (status === "assigned" || status === "in_progress")
+      );
+    }).length,
+  }));
 
   return {
     role: "mentor",

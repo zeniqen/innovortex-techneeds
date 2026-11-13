@@ -8,7 +8,7 @@ import {
 
 import { Crest } from "./crest";
 import { Particles } from "@/components/ui/particles";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { ACCENTS, Chip, PanelCard, StatCard, type Accent } from "./primitives";
 import { ProfileCharts } from "./profile-charts";
@@ -40,6 +40,12 @@ export function ProfileView({
   isSelf: boolean;
   showLeaderboard?: boolean;
 }) {
+  const mentor = role === "mentor";
+  // The crest seed is "id:name". The tn backend sends a leaderboard row
+  // with the name in place of an id, so either can mark the person's row.
+  const [selfId, ...nameParts] = profile.avatarSeed.split(":");
+  const selfName = nameParts.join(":");
+
   return (
     <div className="relative bg-[var(--color-emptiness)] text-[var(--color-caviar)]">
       {/* The particles sit behind the profile. The canvas is the height of
@@ -109,30 +115,44 @@ export function ProfileView({
           <div className="space-y-6 lg:col-span-2">
             {/* --- what to do next ------------------------------------------- */}
             <PanelCard
-              title="What to work on next"
-              description="Picked from what you have said you are interested in, what you have already done, and what is closest to its deadline."
+              title={mentor ? "What needs you next" : "What to work on next"}
+              description={
+                mentor
+                  ? "Picked from what your mentees have handed in, what is past its deadline, and what nobody has started."
+                  : "Only work still to do: picked from its deadline, your stated interests, the points it is worth and the kind of work you are strongest at."
+              }
             >
               {profile.recommendations.length === 0 ? (
                 <p className="text-sm text-[var(--color-iron-fixture)]">
-                  Nothing to suggest right now. You have worked through
-                  everything that was set for you.
+                  {mentor
+                    ? "Nothing needs you right now: nothing is waiting for a mark, past its deadline or untouched."
+                    : "Nothing to suggest right now. Everything set for you has been handed in."}
                 </p>
               ) : (
                 <ul className="space-y-3">
                   {profile.recommendations.map((recommendation) => (
-                    <li
-                      key={`${recommendation.resourceId}-${recommendation.kind}`}
-                      className="rounded-xl border border-[var(--color-night-white)] p-4"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <p className="text-sm font-bold">
-                          {recommendation.title}
+                    <li key={`${recommendation.resourceId}-${recommendation.kind}`}>
+                      <RecommendationLink
+                        // The dashboard is the viewer's own, so a link to it
+                        // only makes sense on their own profile. A resource's
+                        // own link works for anybody.
+                        href={
+                          recommendation.href &&
+                          (isSelf || isExternal(recommendation.href))
+                            ? recommendation.href
+                            : undefined
+                        }
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <p className="text-sm font-bold">
+                            {recommendation.title}
+                          </p>
+                          <Chip>{recommendation.kind}</Chip>
+                        </div>
+                        <p className="mt-1.5 text-xs leading-relaxed text-[var(--color-iron-fixture)]">
+                          {recommendation.reason}
                         </p>
-                        <Chip>{recommendation.kind}</Chip>
-                      </div>
-                      <p className="mt-1.5 text-xs leading-relaxed text-[var(--color-iron-fixture)]">
-                        {recommendation.reason}
-                      </p>
+                      </RecommendationLink>
                     </li>
                   ))}
                 </ul>
@@ -142,12 +162,17 @@ export function ProfileView({
             {/* --- the badges ------------------------------------------------- */}
             <PanelCard
               title="Badges"
-              description="What the work you have done has earned you."
+              description={
+                mentor
+                  ? "Earned from your mentees' numbers and the programs you run."
+                  : "What the work you have done has earned you."
+              }
             >
               {profile.badges.length === 0 ? (
                 <p className="text-sm text-[var(--color-iron-fixture)]">
-                  No badges yet. The first one comes with the first piece of
-                  work you finish.
+                  {mentor
+                    ? "No badges yet. The first one comes with the first mentee."
+                    : "No badges yet. The first one comes with the first piece of work you finish."}
                 </p>
               ) : (
                 <ul className="grid gap-3 sm:grid-cols-2">
@@ -191,7 +216,8 @@ export function ProfileView({
               </p>
               <p className="mt-1 text-xs text-[var(--color-iron-fixture)]">
                 Level {profile.level.number} · {profile.level.completed} of{" "}
-                {profile.level.needed} to the next one
+                {profile.level.needed} {mentor ? "mentees" : "pieces of work"} to
+                the next one
               </p>
               <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--color-night-white)]">
                 <div
@@ -206,8 +232,8 @@ export function ProfileView({
               <PanelCard
                 title="Leaderboard"
                 description={
-                  role === "mentor"
-                    ? "Where your mentees are."
+                  mentor
+                    ? "Your mentees, at their place on the whole leaderboard."
                     : "Where you are."
                 }
               >
@@ -217,7 +243,7 @@ export function ProfileView({
                       key={row.id}
                       className={cn(
                         "flex items-center justify-between gap-3 rounded-lg px-2 py-1 text-sm",
-                        row.id === profile.avatarSeed.split(":")[0]
+                        row.id === selfId || row.id === selfName
                           ? "bg-[var(--color-night-white)] font-bold"
                           : "",
                       )}
@@ -257,6 +283,47 @@ export function ProfileView({
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * True for a link that leaves the site.
+ */
+function isExternal(href: string): boolean {
+  return /^https?:\/\//i.test(href);
+}
+
+/**
+ * A recommendation card. It is a link to where the work is when there is
+ * somewhere to go, and a plain card otherwise. A link that leaves the site
+ * opens in a new tab so the profile stays where it was.
+ */
+function RecommendationLink({
+  href,
+  children,
+}: {
+  href?: string;
+  children: ReactNode;
+}) {
+  const card = "block rounded-xl border border-[var(--color-night-white)] p-4";
+  if (!href) return <div className={card}>{children}</div>;
+
+  const linked = cn(
+    card,
+    "group transition-[border-color,background-color] duration-150 hover:border-[var(--color-spotted-dove)] hover:bg-[var(--color-night-white)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-plum-bright)]",
+  );
+
+  if (isExternal(href)) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={linked}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} className={linked}>
+      {children}
+    </Link>
   );
 }
 
