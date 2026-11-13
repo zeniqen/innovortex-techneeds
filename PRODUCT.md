@@ -97,6 +97,13 @@ profile"; an LLM could sit in front of it later with the same output shape.
   events.
 - The named student testimonials on the landing page
   (`src/components/3d-marquee-demo.tsx`) are real.
+- The cohort tracks (Web Development, C/C++ DSA, AI/ML and GenAI, Open
+  Source) and the event types (hackathons including 24-hour ones, speaker
+  series, coding contests, workshops) are real, as is the FAQ copy about
+  seniors who cracked top internships.
+- The cohort photos on the landing page are Unsplash stock photography
+  (free under the Unsplash License), standing in for real cohort photos the
+  team does not have yet. They illustrate; they are not evidence.
 - Live platform data (programs, mentors, mentees, resources, marks) is in
   the deployed backend's MongoDB.
 - Photos and illustrations in `public/assets/`.
