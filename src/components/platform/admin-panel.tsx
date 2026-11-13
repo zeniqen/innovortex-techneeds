@@ -143,7 +143,9 @@ export async function AdminPanel({
                       key={program.id}
                       title={
                         <Link
-                          href={`/techboard?program=${program.id}`}
+                          // The program's card opens further down the page,
+                          // so the link jumps to it.
+                          href={`/techboard?program=${program.id}#selected-program`}
                           className="underline-offset-4 hover:underline"
                         >
                           {program.name}
@@ -169,6 +171,7 @@ export async function AdminPanel({
 
             {selected && (
               <PanelCard
+                id="selected-program"
                 title={`Mentors on ${selected.name}`}
                 description={`${selectedMentors.length} on this program, ${selectedResources.length} resources published.`}
                 action={
@@ -221,6 +224,7 @@ export async function AdminPanel({
 
             {selectedMentor && (
               <PanelCard
+                id="selected-mentor"
                 title={`Programs for ${selectedMentor.name}`}
                 description={`${mentorPrograms.length} of ${programs.length} programs. A mentor can run more than one.`}
                 action={
@@ -283,7 +287,9 @@ export async function AdminPanel({
                         key={mentor.id}
                         title={
                           <Link
-                            href={`/techboard?mentor=${mentor.id}`}
+                            // The mentor's card opens further down the page,
+                            // so the link jumps to it.
+                            href={`/techboard?mentor=${mentor.id}#selected-mentor`}
                             className="underline-offset-4 hover:underline"
                           >
                             {mentor.name}

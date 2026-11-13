@@ -127,17 +127,22 @@ export function PanelCard({
   action,
   children,
   className,
+  id,
 }: {
   title?: string;
   description?: string;
   action?: ReactNode;
   children: ReactNode;
   className?: string;
+  /** Lets a link jump straight to this card. */
+  id?: string;
 }) {
   return (
     <section
+      id={id}
       className={cn(
-        "rounded-2xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] p-5 sm:p-6",
+        // The margin keeps a card that is jumped to off the very top edge.
+        "scroll-mt-6 rounded-2xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] p-5 sm:p-6",
         className,
       )}
     >
