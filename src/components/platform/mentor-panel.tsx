@@ -130,14 +130,14 @@ export async function MentorPanel({
         </ActionBar>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard value={mentees.length} label="Mentees" />
-          <StatCard value={resources.length} label="Resources" />
-          <StatCard
+          <StatCard accent="violet" value={mentees.length} label="Mentees" />
+          <StatCard accent="amber" value={resources.length} label="Resources" />
+          <StatCard accent="green"
             value={awaiting.length}
             label="Waiting to be marked"
             tone={awaiting.length > 0 ? "warn" : "neutral"}
           />
-          <StatCard value={totalScore} label="Points earned by your mentees" />
+          <StatCard accent="bronze" value={totalScore} label="Points earned by your mentees" />
         </div>
 
         <div className="mt-6 space-y-6">

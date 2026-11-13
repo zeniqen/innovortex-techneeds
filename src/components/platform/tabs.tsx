@@ -54,7 +54,7 @@ export function Tabs({
               className={cn(
                 "-mb-px flex shrink-0 items-center gap-2 border-b-2 px-3.5 py-2.5 text-sm font-semibold transition-colors duration-150",
                 selected
-                  ? "border-[var(--color-caviar)] text-[var(--color-caviar)]"
+                  ? "border-[var(--color-plum-bright)] text-[var(--color-caviar)]"
                   : "border-transparent text-[var(--color-iron-fixture)] hover:text-[var(--color-caviar)]",
               )}
             >
@@ -64,7 +64,7 @@ export function Tabs({
                   className={cn(
                     "rounded-full px-1.5 py-0.5 text-[0.65rem] font-bold tabular-nums",
                     selected
-                      ? "bg-[var(--color-caviar)] text-[var(--color-emptiness)]"
+                      ? "bg-[var(--color-plum-bright)] text-[var(--color-emptiness)]"
                       : "bg-[var(--color-night-white)] text-[var(--color-iron-fixture)]",
                   )}
                 >

@@ -73,14 +73,14 @@ export async function MenteePanel({ user }: { user: SessionUser }) {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard value={profile?.totalScore ?? 0} label="Points" />
-          <StatCard
+          <StatCard accent="violet" value={profile?.totalScore ?? 0} label="Points" />
+          <StatCard accent="amber"
             value={myRank ? `#${myRank}` : "—"}
             label="On the leaderboard"
             hint={profile?.streak ? `${profile.streak} day streak` : undefined}
           />
-          <StatCard value={`${completed}/${resources.length}`} label="Marked" />
-          <StatCard
+          <StatCard accent="green" value={`${completed}/${resources.length}`} label="Marked" />
+          <StatCard accent="bronze"
             value={handedIn}
             label="Handed in, waiting"
             tone={handedIn > 0 ? "warn" : "neutral"}

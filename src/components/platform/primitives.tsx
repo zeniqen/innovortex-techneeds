@@ -174,11 +174,14 @@ export function StatCard({
   label,
   hint,
   tone = "neutral",
+  accent,
 }: {
   value: ReactNode;
   label: string;
   hint?: string;
   tone?: "neutral" | "good" | "warn";
+  /** A thin line of colour along the top, from the site's accent set. */
+  accent?: Accent;
 }) {
   const tones = {
     neutral: "text-[var(--color-caviar)]",
@@ -187,7 +190,14 @@ export function StatCard({
   } as const;
 
   return (
-    <div className="rounded-2xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] p-5">
+    <div className="relative overflow-hidden rounded-2xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] p-5">
+      {accent && (
+        <span
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-1"
+          style={{ background: ACCENTS[accent] }}
+        />
+      )}
       <p className={cn("text-3xl font-extrabold tracking-tight", tones[tone])}>
         {value}
       </p>
@@ -314,13 +324,37 @@ export function ButtonLink({
 }
 
 /**
+ * The site's accent colours, the same set the landing page and the
+ * profile charts use.
+ */
+export type Accent = "violet" | "amber" | "green" | "bronze";
+
+export const ACCENTS: Record<Accent, string> = {
+  violet: "var(--color-plum-bright)",
+  amber: "var(--color-gold-deep)",
+  green: "var(--color-gain)",
+  bronze: "var(--color-bronze-deep)",
+};
+
+/**
  * A badge for a resource type.
+ *
+ * Each kind of work keeps the colour it has on the profile charts:
+ * violet for videos, amber for quizzes, green for projects.
  */
 export function ResourceTypeChip({ type }: { type: string }) {
   const label =
     type === "quiz" ? "Quiz" : type === "project" ? "Project" : "Video";
+  const color =
+    ACCENTS[type === "quiz" ? "amber" : type === "project" ? "green" : "violet"];
   return (
-    <span className="inline-flex items-center gap-1 rounded-md bg-[var(--color-night-white)] px-2 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wide text-[var(--color-iron-fixture)]">
+    <span
+      style={{
+        color,
+        background: `color-mix(in srgb, ${color} 12%, var(--color-emptiness))`,
+      }}
+      className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wide"
+    >
       <IconSparkles className="h-3 w-3" />
       {label}
     </span>

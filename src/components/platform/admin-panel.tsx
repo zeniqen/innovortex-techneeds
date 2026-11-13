@@ -2,6 +2,7 @@ import Link from "next/link";
 import { IconPlus, IconShieldPlus, IconUserPlus } from "@tabler/icons-react";
 
 import { ActionBar, ModalButton } from "@/components/platform/modal";
+import { ScrollIntoView } from "@/components/platform/scroll-into-view";
 import {
   AddAdminForm,
   AssignProgramForm,
@@ -119,10 +120,10 @@ export async function AdminPanel({
         </ActionBar>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard value={counts?.programs ?? 0} label="Programs" />
-          <StatCard value={counts?.mentors ?? 0} label="Mentors" />
-          <StatCard value={counts?.mentees ?? 0} label="Mentees" />
-          <StatCard value={counts?.resources ?? 0} label="Resources" />
+          <StatCard accent="violet" value={counts?.programs ?? 0} label="Programs" />
+          <StatCard accent="amber" value={counts?.mentors ?? 0} label="Mentors" />
+          <StatCard accent="green" value={counts?.mentees ?? 0} label="Mentees" />
+          <StatCard accent="bronze" value={counts?.resources ?? 0} label="Resources" />
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-3">
@@ -143,9 +144,11 @@ export async function AdminPanel({
                       key={program.id}
                       title={
                         <Link
-                          // The program's card opens further down the page,
-                          // so the link jumps to it.
-                          href={`/techboard?program=${program.id}#selected-program`}
+                          // The program's card opens further down the page;
+                          // ScrollIntoView glides to it, so the link itself
+                          // leaves the scroll position alone.
+                          href={`/techboard?program=${program.id}`}
+                          scroll={false}
                           className="underline-offset-4 hover:underline"
                         >
                           {program.name}
@@ -183,6 +186,7 @@ export async function AdminPanel({
                   </Link>
                 }
               >
+                <ScrollIntoView id="selected-program" when={selected.id} />
                 {selectedMentors.length === 0 ? (
                   <EmptyState
                     title="Nobody is on this program yet"
@@ -236,6 +240,7 @@ export async function AdminPanel({
                   </Link>
                 }
               >
+                <ScrollIntoView id="selected-mentor" when={selectedMentor.id} />
                 {mentorPrograms.length === 0 ? (
                   <EmptyState
                     title="Not on any program yet"
@@ -287,9 +292,11 @@ export async function AdminPanel({
                         key={mentor.id}
                         title={
                           <Link
-                            // The mentor's card opens further down the page,
-                            // so the link jumps to it.
-                            href={`/techboard?mentor=${mentor.id}#selected-mentor`}
+                            // The mentor's card opens further down the page;
+                            // ScrollIntoView glides to it, so the link itself
+                            // leaves the scroll position alone.
+                            href={`/techboard?mentor=${mentor.id}`}
+                            scroll={false}
                             className="underline-offset-4 hover:underline"
                           >
                             {mentor.name}
