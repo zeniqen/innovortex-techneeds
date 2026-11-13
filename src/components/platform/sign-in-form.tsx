@@ -18,21 +18,20 @@ import type { Role } from "@/lib/platform/types";
  *
  * A mentee signs in with the enrollment number their mentor gave them. A
  * mentor or an admin signs in with an email address.
+ *
+ * The public form offers mentee and mentor only. Admins sign in at
+ * /login?as=admin, which nothing on the site links to; that form has no
+ * tabs and signs in as an admin only.
  */
 
 const TABS: { role: Role; label: string; Icon: typeof IconSchool }[] = [
   { role: "mentee", label: "Mentee", Icon: IconSchool },
   { role: "mentor", label: "Mentor", Icon: IconUsersGroup },
-  { role: "admin", label: "Admin", Icon: IconShieldCheck },
 ];
 
-export function SignInForm({
-  defaultRole = "mentee",
-}: {
-  defaultRole?: Role;
-}) {
+export function SignInForm({ admin = false }: { admin?: boolean }) {
   const router = useRouter();
-  const [role, setRole] = useState<Role>(defaultRole);
+  const [role, setRole] = useState<Role>(admin ? "admin" : "mentee");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -82,28 +81,35 @@ export function SignInForm({
 
   return (
     <div className="rounded-2xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] p-6 shadow-sm sm:p-8">
-      <div className="flex gap-1 rounded-xl bg-[var(--color-night-white)] p-1">
-        {TABS.map((tab) => (
-          <button
-            key={tab.role}
-            type="button"
-            onClick={() => {
-              setRole(tab.role);
-              setError(null);
-            }}
-            aria-pressed={role === tab.role}
-            className={cn(
-              "flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition-colors duration-150",
-              role === tab.role
-                ? "bg-[var(--color-emptiness)] text-[var(--color-caviar)] shadow-sm"
-                : "text-[var(--color-iron-fixture)] hover:text-[var(--color-caviar)]",
-            )}
-          >
-            <tab.Icon className="h-4 w-4" />
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {admin ? (
+        <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-iron-fixture)]">
+          <IconShieldCheck className="h-4 w-4" />
+          Admin sign in
+        </p>
+      ) : (
+        <div className="flex gap-1 rounded-xl bg-[var(--color-night-white)] p-1">
+          {TABS.map((tab) => (
+            <button
+              key={tab.role}
+              type="button"
+              onClick={() => {
+                setRole(tab.role);
+                setError(null);
+              }}
+              aria-pressed={role === tab.role}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition-colors duration-150",
+                role === tab.role
+                  ? "bg-[var(--color-emptiness)] text-[var(--color-caviar)] shadow-sm"
+                  : "text-[var(--color-iron-fixture)] hover:text-[var(--color-caviar)]",
+              )}
+            >
+              <tab.Icon className="h-4 w-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       <form onSubmit={submit} className="mt-6 space-y-4">
         <div>

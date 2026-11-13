@@ -15,7 +15,7 @@ import {
 export const metadata: Metadata = {
   title: "Sign in | TechNeeds IGDTUW",
   description:
-    "Sign in to the TechNeeds mentorship platform as a mentee, a mentor or an admin.",
+    "Sign in to the TechNeeds mentorship platform as a mentee or a mentor.",
 };
 
 /**
@@ -29,12 +29,16 @@ export const instant = false;
  *
  * Somebody who is already signed in is sent straight to their panel.
  */
-export default function Page() {
+export default function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ as?: string }>;
+}) {
   return (
     <div className="relative flex min-h-screen flex-col bg-[var(--color-emptiness)] text-[var(--color-caviar)] selection:bg-[var(--color-caviar)] selection:text-[var(--color-emptiness)]">
       <main className="flex flex-1 flex-col">
         <Suspense fallback={<SignInFallback />}>
-          <SignInBody />
+          <SignInBody searchParams={searchParams} />
         </Suspense>
       </main>
 
@@ -44,8 +48,15 @@ export default function Page() {
   );
 }
 
-async function SignInBody() {
+async function SignInBody({
+  searchParams,
+}: {
+  searchParams: Promise<{ as?: string }>;
+}) {
   const user = await optionalUser();
+  // The admin form is not offered on the public page; it is reached at
+  // /login?as=admin, which nothing on the site links to.
+  const asAdmin = (await searchParams).as === "admin";
 
   if (user) {
     return (
@@ -86,7 +97,7 @@ async function SignInBody() {
       {needsSetup ? (
         <SetupCard />
       ) : (
-        <SignInForm />
+        <SignInForm admin={asAdmin} />
       )}
     </div>
   );

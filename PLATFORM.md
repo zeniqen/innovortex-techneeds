@@ -5,7 +5,7 @@ Three panels and a profile page, over a choice of two backends.
 | Route | Who it is for | What it does |
 |---|---|---|
 | `/techboard` | everybody | The techboard. Signed out, it asks whether you are a mentee, a mentor or neither. Signed in, it is your dashboard. |
-| `/login` | everybody | Sign in. A mentee uses their enrollment number, a mentor and an admin use their email. |
+| `/login` | everybody | Sign in. A mentee uses their enrollment number, a mentor their email. Admins sign in at `/login?as=admin`, which the site does not link to. |
 | `/profile/[id]` | anybody signed in | The generated profile: a crest, badges, a summary and what to work on next. `/profile/me` is your own. |
 
 The three panels are not pages of their own. They are the techboard, which
