@@ -1,8 +1,9 @@
 /**
  * Data access for the mentee leaderboard.
  *
- * The original TechNeeds IGDTUW site reads its leaderboard from this
- * backend, so the clone reads from the same place and stays current.
+ * The board is read from the platform, which is the place the marks are
+ * actually given, so a mentee who has just been marked appears on it
+ * straight away.
  */
 
 export interface LeaderboardEntry {
@@ -13,13 +14,22 @@ export interface LeaderboardEntry {
 }
 
 /**
- * The backend that serves the leaderboard.
+ * The local backend.
  *
- * It sends `access-control-allow-origin: *`, so it can be called straight
- * from the browser.
+ * The brief for the platform is that the frontend talks to the backend
+ * running on this machine, so that is where this points.
  */
 export const LEADERBOARD_ENDPOINT =
-  "https://tn-backend-1.onrender.com/api/m/leaderboard";
+  `${process.env.TN_BACKEND_URL ?? "http://localhost:8000"}/api/m/leaderboard`;
+
+/**
+ * An opt-in fallback.
+ *
+ * There is none by default: the board comes from the platform, and the
+ * platform comes from the local backend. Set this to a URL to read
+ * somewhere else when the local backend is not running.
+ */
+const FALLBACK_ENDPOINT = process.env.LEADERBOARD_FALLBACK_URL ?? "";
 
 /**
  * Fetches the current leaderboard.
@@ -31,14 +41,12 @@ export const LEADERBOARD_ENDPOINT =
 export async function fetchLeaderboard(
   signal?: AbortSignal,
 ): Promise<LeaderboardEntry[]> {
-  // The platform's own board comes first: it is where the marks are
-  // actually given, so a mentee who has just been marked appears on the
-  // board straight away. The live platform is the fallback for a site
-  // that has not been set up yet.
   const local = await fetchLocalLeaderboard(signal);
   if (local && local.length > 0) return local;
 
-  const res = await fetch(LEADERBOARD_ENDPOINT, {
+  if (!FALLBACK_ENDPOINT) return [];
+
+  const res = await fetch(FALLBACK_ENDPOINT, {
     signal,
     cache: "no-store",
   });

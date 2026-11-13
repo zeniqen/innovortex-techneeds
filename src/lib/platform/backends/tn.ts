@@ -639,13 +639,24 @@ export async function listMentorResourceProgress(
   const mentees = await listMenteesForProgram(programId);
   void mentorId;
 
+  // Each mentee is fetched once and their progress is read off the
+  // document. Asking for one piece of work at a time would mean a request
+  // for every mentee and every resource, which is a few hundred requests
+  // for one panel.
+  const raws = await Promise.all(
+    mentees.map((mentee) => rawMentee(mentee.id)),
+  );
+
   const result = [];
   for (const resource of resources) {
     const entries = [];
-    for (const mentee of mentees) {
+    for (let index = 0; index < mentees.length; index++) {
+      const completion = raws[index]?.completedResources?.find(
+        (entry) => idOf(entry.resource) === resource.id,
+      );
       entries.push({
-        mentee,
-        progress: await getProgress(mentee.id, resource.id),
+        mentee: mentees[index],
+        progress: toProgress(mentees[index].id, resource.id, completion),
       });
     }
     result.push({ resource, entries });

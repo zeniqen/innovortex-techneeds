@@ -5,7 +5,7 @@ import { IconTrash } from "@tabler/icons-react";
 
 import { ActionForm, DangerButton, RemoveButton, type FieldSpec } from "./action-form";
 import { CredentialCard } from "./credential-card";
-import type { Mentor } from "@/lib/platform/types";
+import type { Mentor, Program } from "@/lib/platform/types";
 
 /**
  * A program, as far as the assignment controls need to know about it.
@@ -261,6 +261,58 @@ export function AddAdminForm() {
         />
       )}
     </div>
+  );
+}
+
+/**
+ * Changes a program.
+ *
+ * A program is not only made once: its name, what it covers and whether
+ * it is still running all change over the life of a cohort.
+ */
+export function EditProgramForm({ program }: { program: Program }) {
+  const fields: FieldSpec[] = [
+    {
+      name: "name",
+      label: "Name",
+      type: "text",
+      required: true,
+      defaultValue: program.name,
+      width: "half",
+    },
+    {
+      name: "track",
+      label: "Subject area",
+      type: "text",
+      defaultValue: program.track,
+      hint: "Used to match mentees against the work they have done.",
+      width: "half",
+    },
+    {
+      name: "status",
+      label: "Status",
+      type: "select",
+      defaultValue: program.status,
+      options: [
+        { value: "active", label: "Active" },
+        { value: "archived", label: "Archived" },
+      ],
+    },
+    {
+      name: "description",
+      label: "Description",
+      type: "textarea",
+      defaultValue: program.description,
+    },
+  ];
+
+  return (
+    <ActionForm
+      action={`/api/platform/admin/programs/${program.id}`}
+      method="PATCH"
+      fields={fields}
+      submitLabel="Save changes"
+    />
   );
 }
 

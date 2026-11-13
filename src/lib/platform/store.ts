@@ -5,15 +5,15 @@ import type { PlatformStore } from "./store-types";
 /**
  * Where the platform data lives.
  *
- * By default it is in this project's own SQLite database, which works
- * anywhere and needs nothing set up. Set `PLATFORM_BACKEND=tn` and the
- * same calls go to the Express and MongoDB backend that came with the
- * platform instead.
+ * By default it is in the backend that came with the platform, running on
+ * this machine at http://localhost:8000, which is what the brief asks
+ * for. Set `PLATFORM_BACKEND=sqlite` to keep it in this project's own
+ * database instead, which needs no MongoDB and nothing else set up.
  *
  * The panels do not know which one they are talking to.
  */
 const backend: PlatformStore =
-  process.env.PLATFORM_BACKEND === "tn" ? tn : sqlite;
+  process.env.PLATFORM_BACKEND === "sqlite" ? sqlite : tn;
 
 /**
  * True when the platform data is being held by the tn backend rather than

@@ -40,9 +40,15 @@ import type { ResourceType } from "./types";
 export const DEMO_PASSWORD = "techneeds-demo";
 
 /**
- * The live backend the seed reads from.
+ * Where the seed copies from.
+ *
+ * The brief for the platform is that the frontend talks to the backend
+ * running on this machine, so that is where this points: the local
+ * backend holds the same programs, mentors, mentees and resources.
  */
-const SOURCE = "https://tn-backend-1.onrender.com";
+const SOURCE =
+  process.env.SEED_SOURCE_URL ??
+  `${process.env.TN_BACKEND_URL ?? "http://localhost:8000"}`;
 
 /**
  * How long a request to the live backend may take.
