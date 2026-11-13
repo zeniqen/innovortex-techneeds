@@ -167,7 +167,7 @@ export function SignInForm({ admin = false }: { admin?: boolean }) {
         <button
           type="submit"
           disabled={busy}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-caviar)] px-5 py-3 text-sm font-bold text-[var(--color-emptiness)] shadow-md transition-colors duration-150 hover:bg-[var(--color-iron-fixture)] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-caviar)] px-5 py-3 text-sm font-bold text-[var(--color-emptiness)] shadow-md tn-press hover:bg-[var(--color-iron-fixture)] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {busy && <IconLoader2 className="h-4 w-4 animate-spin" />}
           {busy ? "Signing in..." : "Sign in"}

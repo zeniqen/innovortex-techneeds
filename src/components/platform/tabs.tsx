@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -19,6 +19,35 @@ export function Tabs({
   const [active, setActive] = useState(tabs[0]?.id);
   const base = useId();
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // A link elsewhere on the page can point at something inside a tab
+  // (href="#resource-…"). The browser cannot scroll to an element in a
+  // hidden panel, so the tab it lives in is opened first, then the page
+  // glides to it and it flashes once so the eye lands on it. The hash is
+  // cleared afterwards, so the same link works when pressed again.
+  useEffect(() => {
+    const reveal = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      const target = id ? document.getElementById(id) : null;
+      const panel = target?.closest<HTMLElement>("[data-tab]");
+      if (!target || !panel?.dataset.tab) return;
+
+      setActive(panel.dataset.tab);
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+
+      requestAnimationFrame(() => {
+        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+        target.classList.remove("tn-flash");
+        // Restart the flash if it is already running.
+        void target.offsetWidth;
+        target.classList.add("tn-flash");
+      });
+    };
+
+    window.addEventListener("hashchange", reveal);
+    return () => window.removeEventListener("hashchange", reveal);
+  }, []);
 
   const move = (from: number, step: number) => {
     const next = (from + step + tabs.length) % tabs.length;
@@ -80,6 +109,7 @@ export function Tabs({
         <div
           key={tab.id}
           role="tabpanel"
+          data-tab={tab.id}
           id={`${base}-panel-${tab.id}`}
           aria-labelledby={`${base}-tab-${tab.id}`}
           hidden={tab.id !== active}

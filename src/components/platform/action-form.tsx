@@ -145,7 +145,7 @@ export function ActionForm({
         type="submit"
         disabled={busy}
         className={cn(
-          "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60",
+          "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tn-press disabled:cursor-not-allowed disabled:opacity-60",
           tone === "danger"
             ? "bg-[var(--color-loss)] text-white hover:bg-[var(--color-loss)]/90"
             : "bg-[var(--color-caviar)] text-[var(--color-emptiness)] hover:bg-[var(--color-iron-fixture)]",

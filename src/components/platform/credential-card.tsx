@@ -38,7 +38,7 @@ export function CredentialCard({
   };
 
   return (
-    <div className="rounded-2xl border border-[var(--color-gain)]/30 bg-[var(--color-gain)]/5 p-5">
+    <div className="tn-enter-pop rounded-2xl border border-[var(--color-gain)]/30 bg-[var(--color-gain)]/5 p-5">
       <p className="flex items-center gap-2 text-sm font-bold text-[var(--color-caviar)]">
         <IconKey className="h-4 w-4" />
         Copy these now

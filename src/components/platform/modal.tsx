@@ -53,7 +53,7 @@ export function ModalButton({
         type="button"
         onClick={() => dialog.current?.showModal()}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold transition-colors duration-150",
+          "inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold tn-press",
           tone === "primary"
             ? "bg-[var(--color-caviar)] text-[var(--color-emptiness)] hover:bg-[var(--color-iron-fixture)]"
             : "border border-[var(--color-spotted-dove)] text-[var(--color-caviar)] hover:bg-[var(--color-night-white)]",

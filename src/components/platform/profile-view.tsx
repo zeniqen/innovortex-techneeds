@@ -8,7 +8,9 @@ import {
 
 import { Crest } from "./crest";
 import { Particles } from "@/components/ui/particles";
-import { Chip, PanelCard, StatCard } from "./primitives";
+import type { CSSProperties } from "react";
+
+import { ACCENTS, Chip, PanelCard, StatCard, type Accent } from "./primitives";
 import { ProfileCharts } from "./profile-charts";
 import type { ProfileCharts as Charts } from "@/lib/platform/ai/charts";
 import { cn } from "@/lib/utils";
@@ -149,23 +151,25 @@ export function ProfileView({
                 </p>
               ) : (
                 <ul className="grid gap-3 sm:grid-cols-2">
-                  {profile.badges.map((badge) => (
+                  {profile.badges.map((badge, index) => (
                     <li
                       key={badge.id}
-                      className="group rounded-xl border border-[var(--color-night-white)] p-3.5 transition-colors duration-150 hover:border-[var(--color-spotted-dove)]"
+                      // Each badge keeps one colour (from its id), so it is
+                      // recognisable from one visit to the next. A warning
+                      // badge stays amber, because that colour means
+                      // something. The tiles rise in one after another.
+                      style={
+                        {
+                          "--accent":
+                            badge.tone === "warn" ? ACCENTS.amber : badgeAccent(badge.id),
+                          animationDelay: `${Math.min(index, 7) * 40}ms`,
+                        } as CSSProperties
+                      }
+                      className="tn-rise group rounded-xl border border-[color-mix(in_srgb,var(--accent)_25%,var(--color-night-white))] bg-[color-mix(in_srgb,var(--accent)_6%,var(--color-emptiness))] p-3.5 transition-[border-color,translate,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-md"
                     >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={cn(
-                            "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg",
-                            badge.tone === "good"
-                              ? "bg-[var(--color-gain)]/10 text-[var(--color-gain)]"
-                              : badge.tone === "warn"
-                                ? "bg-[var(--color-amber)]/10 text-[var(--color-amber)]"
-                                : "bg-[var(--color-night-white)] text-[var(--color-iron-fixture)]",
-                          )}
-                        >
-                          <IconSparkles className="h-3.5 w-3.5" />
+                      <div className="flex items-center gap-2.5">
+                        <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--accent)_16%,var(--color-emptiness))] text-[var(--accent)] transition-[scale] duration-200 group-hover:scale-110">
+                          <IconSparkles className="h-4 w-4" />
                         </span>
                         <p className="text-sm font-bold">{badge.label}</p>
                       </div>
@@ -295,4 +299,14 @@ function LevelRing({ level }: { level: AiProfile["level"] }) {
       />
     </svg>
   );
+}
+
+/**
+ * A badge's colour, picked from its id so it is the same every time.
+ */
+function badgeAccent(id: string): string {
+  const order: Accent[] = ["violet", "amber", "green", "bronze"];
+  let hash = 0;
+  for (const char of id) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return ACCENTS[order[hash % order.length]];
 }

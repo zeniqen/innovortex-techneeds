@@ -310,7 +310,7 @@ export function ButtonLink({
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-colors duration-150",
+        "inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold tn-press",
         variant === "primary"
           ? "bg-[var(--color-caviar)] text-[var(--color-emptiness)] hover:bg-[var(--color-iron-fixture)]"
           : "border border-[var(--color-spotted-dove)] text-[var(--color-caviar)] hover:bg-[var(--color-night-white)]",
