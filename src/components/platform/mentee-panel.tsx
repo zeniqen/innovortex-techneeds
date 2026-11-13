@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { IconSparkles } from "@tabler/icons-react";
 
-import { LiveLeaderboard } from "@/components/platform/live-leaderboard";
 import { ResourceCard } from "@/components/platform/resource-card";
 import { Tabs } from "@/components/platform/tabs";
 import {
@@ -153,18 +152,6 @@ export async function MenteePanel({ user }: { user: SessionUser }) {
                         ))}
                       </ul>
                     )}
-                  </PanelCard>
-                ),
-              },
-              {
-                id: "leaderboard",
-                label: "Leaderboard",
-                content: (
-                  <PanelCard
-                    title="Leaderboard"
-                    description="Where you are, updated as other people hand work in."
-                  >
-                    <LiveLeaderboard currentId={user.id} fallback={rows} />
                   </PanelCard>
                 ),
               },
