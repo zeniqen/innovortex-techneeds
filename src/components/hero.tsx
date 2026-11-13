@@ -9,15 +9,17 @@ export default function Hero() {
       {/* Wavy background layer */}
       <WavyBackground
         containerClassName="absolute inset-0 h-full w-full"
+        // The site's accent colours, blurred and faint, so the hero has a
+        // warm wash of colour without competing with the headline.
         colors={[
-          "var(--color-night-white)",
-          "var(--color-spotted-dove)",
-          "var(--color-night-white)",
-          "var(--color-spotted-dove)",
-          "var(--color-night-white)",
+          "var(--color-plum-bright)",
+          "var(--color-gold)",
+          "var(--color-gain)",
+          "var(--color-bronze)",
+          "var(--color-plum-bright)",
         ]}
         backgroundFill="transparent"
-        waveOpacity={0.3}
+        waveOpacity={0.18}
         blur={18}
         waveWidth={50}
       />
@@ -29,7 +31,11 @@ export default function Hero() {
         <div className="max-w-3xl mx-auto text-center space-y-6">
           {/* Pill Announcement */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[var(--color-night-white)] border border-[var(--color-spotted-dove)] text-[var(--color-caviar)]">
-            <span className="flex h-2 w-2 rounded-full bg-[var(--color-caviar)]" />
+            {/* Green, because the cohorts are open. */}
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-gain)] opacity-60 motion-reduce:animate-none" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--color-gain)]" />
+            </span>
             <span className="font-bold">TechNeeds IGDTUW</span>
             <span className="text-[var(--color-stone-haze)]">•</span>
             <span className="text-[var(--color-iron-fixture)]">Mentorship Cohorts Open</span>
@@ -53,7 +59,7 @@ export default function Hero() {
           <p className="text-base sm:text-lg text-[var(--color-iron-fixture)] max-w-2xl mx-auto leading-relaxed">
             At <strong className="text-[var(--color-caviar)] font-semibold">TechNeeds IGDTUW</strong>, we are
             passionate about engineering excellence. As Indira Gandhi Delhi Technical University for
-            Women&apos;s premier tech community, we empower <strong className="text-[var(--color-caviar)] font-semibold">1,200+ students</strong> through
+            Women&apos;s premier tech community, we empower <strong className="text-[var(--color-plum-bright)] font-semibold">1,200+ students</strong> through
             cohort-driven mentorship, flagship hackathons, and 1-on-1 industry guidance.
           </p>
 
@@ -71,7 +77,7 @@ export default function Hero() {
               href="#glimpse"
               className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm text-[var(--color-caviar)] bg-[var(--color-night-white)] hover:bg-[var(--color-spotted-dove)]/40 border border-[var(--color-spotted-dove)] transition-all hover:-translate-y-0.5 active:translate-y-0"
             >
-              <IconRocket className="w-4 h-4 text-[var(--color-iron-fixture)]" />
+              <IconRocket className="w-4 h-4 text-[var(--color-bronze-deep)]" />
               <span>Community Events</span>
             </a>
 
@@ -86,15 +92,15 @@ export default function Hero() {
           {/* Quick trust proofs */}
           <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-[var(--color-iron-fixture)] border-t border-[var(--color-night-white)]">
             <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-caviar)]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-plum-bright)]" />
               <span>IGDTUW&apos;s #1 Tech Society</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-stone-haze)]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-gold-deep)]" />
               <span>1,200+ Active Mentees</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-iron-fixture)]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-gain)]" />
               <span>50+ Professional Mentors</span>
             </div>
           </div>

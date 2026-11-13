@@ -25,28 +25,32 @@ export default function Stats() {
       suffix: "+",
       label: "Trained Mentees",
       description: "Empowering female engineers across batches to break into top product companies.",
-      icon: <IconUsers className="w-6 h-6 text-[var(--color-caviar)]" />,
+      icon: <IconUsers className="w-6 h-6" />,
+      accent: "var(--color-plum-bright)",
     },
     {
       value: 50,
       suffix: "+",
       label: "Professional Mentors",
       description: "Proven guidance from seniors and industry engineers at Microsoft, Google, and Amazon.",
-      icon: <IconAward className="w-6 h-6 text-[var(--color-caviar)]" />,
+      icon: <IconAward className="w-6 h-6" />,
+      accent: "var(--color-gold-deep)",
     },
     {
       value: 10,
       suffix: "+",
       label: "Mentorship Cohorts",
       description: "Structured curriculum covering Web Dev, C++ DSA, AI/ML, and Open Source contributions.",
-      icon: <IconSchool className="w-6 h-6 text-[var(--color-caviar)]" />,
+      icon: <IconSchool className="w-6 h-6" />,
+      accent: "var(--color-gain)",
     },
     {
       value: 100,
       suffix: "+",
       label: "Amazing Events",
       description: "Hackathons, speaker series, mock coding contests, and tech workshops on campus.",
-      icon: <IconCalendarEvent className="w-6 h-6 text-[var(--color-caviar)]" />,
+      icon: <IconCalendarEvent className="w-6 h-6" />,
+      accent: "var(--color-bronze-deep)",
     },
   ];
 
@@ -95,10 +99,13 @@ export default function Stats() {
           {stats.map((stat, idx) => (
             <div
               key={idx}
-              className="relative group rounded-2xl p-6 bg-[var(--color-emptiness)] border border-[var(--color-spotted-dove)] hover:border-[var(--color-caviar)] transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+              style={{ "--accent": stat.accent } as React.CSSProperties}
+              className="relative group overflow-hidden rounded-2xl p-6 bg-[var(--color-emptiness)] border border-[var(--color-spotted-dove)] hover:border-[var(--accent)] transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
             >
+              {/* A thin line of the card's colour along the top. */}
+              <span aria-hidden className="absolute inset-x-0 top-0 h-1 bg-[var(--accent)]" />
               <div className="space-y-4">
-                <div className="w-12 h-12 rounded-xl bg-[var(--color-night-white)] border border-[var(--color-spotted-dove)] flex items-center justify-center transition-transform group-hover:scale-105">
+                <div className="w-12 h-12 rounded-xl text-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_12%,var(--color-emptiness))] border border-[color-mix(in_srgb,var(--accent)_30%,var(--color-emptiness))] flex items-center justify-center transition-transform group-hover:scale-105">
                   {stat.icon}
                 </div>
 
