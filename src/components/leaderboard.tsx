@@ -88,27 +88,17 @@ export default function Leaderboard() {
     <section id="leaderboard" className="relative bg-[var(--color-emptiness)]">
       {/* ---- Purple band: heading and podium ---- */}
       <div className="bg-plum-band relative overflow-hidden pt-20 pb-36">
-        <div className="bg-plum-grid pointer-events-none absolute inset-0" />
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <PageReveal>
             {/* Page Header */}
             <div className="text-center space-y-4">
-              <div className="flex items-center justify-center gap-3">
-                <span className="hidden sm:block h-px w-12 bg-white/30" />
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[var(--color-emptiness)] text-[var(--color-plum-deep)]">
-                  <IconCrown className="w-3.5 h-3.5" />
-                  <span>Mentee Standings</span>
-                </span>
-                <span className="hidden sm:block h-px w-12 bg-white/30" />
-              </div>
-
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white">
                 Leaderboard
               </h1>
               <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
-                Every point here comes from showing up — streaks, mentorships and
-                the sessions you have put in.
+                Every point here is a mark earned on cohort work: the videos,
+                quizzes and projects a mentee has handed in and had marked.
               </p>
             </div>
 
@@ -137,8 +127,8 @@ export default function Leaderboard() {
                     Climb the leaderboard!
                   </h2>
                   <p className="text-sm text-white/80">
-                    Earn XP through mentorship sessions, tech talks and
-                    hackathons.
+                    Join a cohort, hand in the work, and every mark you earn
+                    counts towards your rank.
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">

@@ -24,7 +24,7 @@ export default function Stats() {
       separator: ",",
       suffix: "+",
       label: "Trained Mentees",
-      description: "Empowering female engineers across batches to break into top product companies.",
+      description: "Students across batches who have finished a TechNeeds mentorship cohort.",
       icon: <IconUsers className="w-6 h-6" />,
       accent: "var(--color-plum-bright)",
     },
@@ -32,7 +32,7 @@ export default function Stats() {
       value: 50,
       suffix: "+",
       label: "Professional Mentors",
-      description: "Proven guidance from seniors and industry engineers at Microsoft, Google, and Amazon.",
+      description: "Seniors and working engineers who give their time to run cohorts and review work.",
       icon: <IconAward className="w-6 h-6" />,
       accent: "var(--color-gold-deep)",
     },
@@ -47,7 +47,7 @@ export default function Stats() {
     {
       value: 100,
       suffix: "+",
-      label: "Amazing Events",
+      label: "Events Held",
       description: "Hackathons, speaker series, mock coding contests, and tech workshops on campus.",
       icon: <IconCalendarEvent className="w-6 h-6" />,
       accent: "var(--color-bronze-deep)",
@@ -82,11 +82,8 @@ export default function Stats() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--color-night-white)] text-[var(--color-caviar)] border border-[var(--color-spotted-dove)]">
-            <span>IGDTUW Students&apos; First Choice</span>
-          </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--color-caviar)]">
-            Proven Impact That Speaks For Itself
+            TechNeeds in Numbers
           </h2>
           <p className="text-[var(--color-iron-fixture)] text-sm sm:text-base leading-relaxed">
             TechNeeds IGDTUW bridges the gap between college curriculum and real-world tech careers,

@@ -1,6 +1,5 @@
 "use client";
 
-import { IconUsersGroup } from "@tabler/icons-react";
 import { PageReveal } from "@/components/ui/page-reveal";
 import {
   TeamLanyardRail,
@@ -32,10 +31,6 @@ export default function Team() {
         <PageReveal>
           {/* Page Header */}
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--color-night-white)] text-[var(--color-caviar)] border border-[var(--color-spotted-dove)]">
-              <IconUsersGroup className="w-3.5 h-3.5 text-[var(--color-iron-fixture)]" />
-              <span>Who We Are</span>
-            </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[var(--color-caviar)]">
               Meet Our Team
             </h1>
@@ -62,11 +57,10 @@ export default function Team() {
             <TeamLanyardRail
               key={group.role}
               items={items}
-              eyebrow={`${group.members.length} ${
-                group.members.length === 1 ? "member" : "members"
-              }`}
               heading={group.role}
-              caption="Click a badge to turn it over, or drag one along the rail."
+              caption={`${group.members.length} ${
+                group.members.length === 1 ? "member" : "members"
+              }. Click a badge to turn it over, or drag one along the rail.`}
               className="mb-16 last:mb-0"
             />
           );

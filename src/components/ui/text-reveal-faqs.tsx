@@ -4,7 +4,6 @@ import React from "react";
 import { motion, useReducedMotion } from "motion/react";
 import {
   IconBrandWhatsapp,
-  IconHelpCircle,
   IconMail,
 } from "@tabler/icons-react";
 
@@ -161,11 +160,7 @@ export default function FAQs({
       <div className="mx-auto max-w-6xl px-6">
         <div className="grid gap-8 md:grid-cols-5 md:gap-12">
           <div className="md:col-span-2">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-spotted-dove)] bg-[var(--color-night-white)] px-3 py-1 text-xs font-semibold text-[var(--color-caviar)]">
-              <IconHelpCircle className="h-3.5 w-3.5 text-[var(--color-iron-fixture)]" />
-              <span>Got Questions?</span>
-            </div>
-            <Heading className="mt-5 text-4xl font-extrabold tracking-tight text-foreground">
+            <Heading className="text-4xl font-extrabold tracking-tight text-foreground">
               {title}
             </Heading>
             <p className="mt-4 text-balance text-lg leading-relaxed text-muted-foreground">

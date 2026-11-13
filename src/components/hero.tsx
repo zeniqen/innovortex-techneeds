@@ -1,4 +1,5 @@
-import { IconArrowRight, IconRocket } from "@tabler/icons-react";
+import Link from "next/link";
+import { IconArrowRight } from "@tabler/icons-react";
 import { EncryptedText } from "@/components/ui/encrypted-text";
 import { SplashGate } from "@/components/ui/splash-gate";
 import { WavyBackground } from "@/components/ui/wavy-background";
@@ -23,9 +24,6 @@ export default function Hero() {
         blur={18}
         waveWidth={50}
       />
-
-      {/* Subtle grid background */}
-      <div className="absolute inset-0 bg-subtle-grid opacity-60 pointer-events-none -z-10" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center space-y-6">
@@ -57,35 +55,27 @@ export default function Hero() {
 
           {/* Subtitle */}
           <p className="text-base sm:text-lg text-[var(--color-iron-fixture)] max-w-2xl mx-auto leading-relaxed">
-            At <strong className="text-[var(--color-caviar)] font-semibold">TechNeeds IGDTUW</strong>, we are
-            passionate about engineering excellence. As Indira Gandhi Delhi Technical University for
-            Women&apos;s premier tech community, we empower <strong className="text-[var(--color-plum-bright)] font-semibold">1,200+ students</strong> through
-            cohort-driven mentorship, flagship hackathons, and 1-on-1 industry guidance.
+            <strong className="text-[var(--color-caviar)] font-semibold">TechNeeds IGDTUW</strong> is the
+            student tech society of Indira Gandhi Delhi Technical University for Women. Seniors mentor
+            juniors through structured cohorts, and we have trained{" "}
+            <strong className="text-[var(--color-plum-bright)] font-semibold">1,200+ mentees</strong> so far.
           </p>
 
           {/* Action Buttons */}
           <div className="pt-2 flex flex-wrap items-center justify-center gap-4">
-            <a
-              href="#cohorts"
+            <Link
+              href="/login"
               className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm text-[var(--color-emptiness)] bg-[var(--color-caviar)] hover:bg-[var(--color-iron-fixture)] shadow-md transition-[translate,background-color,box-shadow] hover:-translate-y-0.5 active:translate-y-0"
             >
-              <span>Explore Cohorts</span>
+              <span>Open the platform</span>
               <IconArrowRight className="w-4 h-4" />
-            </a>
+            </Link>
 
             <a
-              href="#glimpse"
+              href="#cohorts"
               className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm text-[var(--color-caviar)] bg-[var(--color-night-white)] hover:bg-[var(--color-spotted-dove)]/40 border border-[var(--color-spotted-dove)] transition-[translate,background-color,box-shadow] hover:-translate-y-0.5 active:translate-y-0"
             >
-              <IconRocket className="w-4 h-4 text-[var(--color-bronze-deep)]" />
-              <span>Community Events</span>
-            </a>
-
-            <a
-              href="#about"
-              className="text-sm font-semibold text-[var(--color-iron-fixture)] hover:text-[var(--color-caviar)] transition-colors underline-offset-4 hover:underline px-2 py-1"
-            >
-              Know More →
+              <span>Explore Cohorts</span>
             </a>
           </div>
 
@@ -93,11 +83,11 @@ export default function Hero() {
           <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-[var(--color-iron-fixture)] border-t border-[var(--color-night-white)]">
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-plum-bright)]" />
-              <span>IGDTUW&apos;s #1 Tech Society</span>
+              <span>10+ Mentorship Cohorts</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-gold-deep)]" />
-              <span>1,200+ Active Mentees</span>
+              <span>1,200+ Trained Mentees</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-gain)]" />

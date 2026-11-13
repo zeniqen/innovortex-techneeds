@@ -3,7 +3,6 @@
 import React from "react";
 import Image from "next/image";
 import {
-  IconTarget,
   IconCode,
   IconTrophy,
   IconMicrophone,
@@ -13,33 +12,33 @@ import {
 export default function Mission() {
   const offerings = [
     {
-      title: "In-Depth Insights & Curated Tracks",
+      title: "Curated Learning Tracks",
       description:
-        "Structured learning paths designed by seniors who cracked top internships, bypassing outdated tutorials.",
+        "Learning paths put together by seniors, so you know what to study next instead of guessing between tutorials.",
       icon: <IconCode className="w-6 h-6" />,
       accent: "var(--color-plum-bright)",
       tag: "Curriculum",
     },
     {
-      title: "Flagship Hackathons & Events",
+      title: "Hackathons & Events",
       description:
-        "High-stakes 24-hour coding sprints with live mentor desks, problem statements from tech leaders, and grand prizes.",
+        "Hackathons, coding contests and workshops on campus, with seniors around to help when you get stuck.",
       icon: <IconTrophy className="w-6 h-6" />,
       accent: "var(--color-gold-deep)",
       tag: "Competition",
     },
     {
-      title: "Speaker Sessions & Industry AMAs",
+      title: "Speaker Sessions",
       description:
-        "Direct interactions with engineers, founders, and alumnae working at Microsoft, Google, Goldman Sachs, and top startups.",
+        "Engineers, founders and alumnae talk about their work and answer your questions.",
       icon: <IconMicrophone className="w-6 h-6" />,
       accent: "var(--color-gain)",
       tag: "Networking",
     },
     {
-      title: "Vibrant IGDTUW Peer Community",
+      title: "Peer Community",
       description:
-        "Collaborative study rooms, hackathon team matching, DSA problem-of-the-day discussions, and round-the-clock help desks.",
+        "Study groups, finding a team for a hackathon, and DSA discussions with students from every year.",
       icon: <IconUsersGroup className="w-6 h-6" />,
       accent: "var(--color-bronze-deep)",
       tag: "Community",
@@ -53,10 +52,6 @@ export default function Mission() {
         <div className="relative rounded-3xl p-8 sm:p-12 bg-[var(--color-night-white)]/60 border border-[var(--color-spotted-dove)] mb-16 overflow-hidden">
           <div className="relative z-10 grid lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-8 space-y-4">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--color-emptiness)] text-[var(--color-caviar)] border border-[var(--color-spotted-dove)]">
-                <IconTarget className="w-3.5 h-3.5 text-[var(--color-plum-bright)]" />
-                <span>Our Core Mission</span>
-              </div>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[var(--color-caviar)] tracking-tight">
                 Empowering every woman engineer at IGDTUW to{" "}
                 <span className="text-[var(--color-plum-bright)]">
@@ -64,9 +59,9 @@ export default function Mission() {
                 </span>
               </h2>
               <p className="text-[var(--color-iron-fixture)] text-sm sm:text-base leading-relaxed max-w-2xl">
-                To be the ultimate go-to resource for anyone seeking to understand, build, and conquer
-                the ever-evolving world of software development. We nurture curious beginners into
-                hackathon champions and skilled software engineers.
+                We want to be where IGDTUW students come to learn how software is built: from seniors
+                who were in their place a year or two ago, at their own pace, with people to ask along
+                the way.
               </p>
             </div>
 
@@ -87,11 +82,8 @@ export default function Mission() {
         {/* What We Offer Grid */}
         <div className="space-y-8">
           <div className="text-left space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--color-night-white)] text-[var(--color-caviar)] border border-[var(--color-spotted-dove)]">
-              <span>What We Offer</span>
-            </div>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-caviar)] tracking-tight">
-              A Comprehensive Ecosystem Built For Coders
+              What We Offer
             </h3>
           </div>
 
@@ -109,7 +101,7 @@ export default function Mission() {
                     <div className="w-12 h-12 rounded-xl text-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_12%,var(--color-emptiness))] border border-[color-mix(in_srgb,var(--accent)_30%,var(--color-emptiness))] flex items-center justify-center transition-transform group-hover:scale-105">
                       {item.icon}
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded text-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_10%,var(--color-emptiness))] border border-[color-mix(in_srgb,var(--accent)_25%,var(--color-emptiness))]">
+                    <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded text-[color-mix(in_srgb,var(--accent)_50%,var(--color-caviar))] bg-[color-mix(in_srgb,var(--accent)_10%,var(--color-emptiness))] border border-[color-mix(in_srgb,var(--accent)_25%,var(--color-emptiness))]">
                       {item.tag}
                     </span>
                   </div>
@@ -121,11 +113,6 @@ export default function Mission() {
                   <p className="text-xs text-[var(--color-iron-fixture)] leading-relaxed">
                     {item.description}
                   </p>
-                </div>
-
-                <div className="pt-4 mt-4 border-t border-[var(--color-night-white)] flex items-center text-xs font-semibold text-[var(--color-caviar)]">
-                  <span>Learn more</span>
-                  <span className="ml-1 transition-transform group-hover:translate-x-1">→</span>
                 </div>
               </div>
             ))}
