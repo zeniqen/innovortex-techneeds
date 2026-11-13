@@ -88,7 +88,7 @@ function ReviewCard({ review }: { review: Review }) {
             <IconStarFilled
               key={i}
               className={`w-3.5 h-3.5 ${
-                i < review.rating ? "text-[var(--color-caviar)]" : "text-[var(--color-night-white)]"
+                i < review.rating ? "text-[var(--color-gold)]" : "text-[var(--color-night-white)]"
               }`}
             />
           ))}
