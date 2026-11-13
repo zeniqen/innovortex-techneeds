@@ -83,7 +83,8 @@ function ReviewCard({ review }: { review: Review }) {
     <article className="flex size-full flex-col justify-between gap-4 overflow-hidden bg-[var(--color-emptiness)] p-6 text-left">
       {/* Rating + quote icon */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-0.5">
+        <p className="sr-only">Rated {review.rating} out of 5</p>
+        <div aria-hidden className="flex items-center gap-0.5">
           {[...Array(5)].map((_, i) => (
             <IconStarFilled
               key={i}
@@ -93,7 +94,7 @@ function ReviewCard({ review }: { review: Review }) {
             />
           ))}
         </div>
-        <IconQuote className="w-5 h-5 shrink-0 text-[var(--color-spotted-dove)]" />
+        <IconQuote aria-hidden className="w-5 h-5 shrink-0 text-[var(--color-spotted-dove)]" />
       </div>
 
       {/* Quote */}
@@ -103,14 +104,14 @@ function ReviewCard({ review }: { review: Review }) {
 
       {/* Student bio */}
       <div className="flex items-center gap-2.5 border-t border-[var(--color-night-white)] pt-3.5">
-        <div className="w-8 h-8 shrink-0 rounded-lg bg-[var(--color-night-white)] border border-[var(--color-spotted-dove)] flex items-center justify-center font-bold text-[10px] text-[var(--color-caviar)]">
+        <div aria-hidden className="w-8 h-8 shrink-0 rounded-lg bg-[var(--color-night-white)] border border-[var(--color-spotted-dove)] flex items-center justify-center font-bold text-[11px] text-[var(--color-caviar)]">
           {review.initials}
         </div>
         <div className="min-w-0">
           <h3 className="text-[13px] font-bold text-[var(--color-caviar)] truncate">
             {review.name}
           </h3>
-          <p className="text-[10px] text-[var(--color-iron-fixture)] truncate">{review.role}</p>
+          <p className="text-xs text-[var(--color-iron-fixture)] truncate">{review.role}</p>
         </div>
       </div>
     </article>
@@ -119,12 +120,15 @@ function ReviewCard({ review }: { review: Review }) {
 
 export default function ThreeDMarqueeDemo() {
   // The marquee splits the list into 4 columns, so the same set of reviews is
-  // repeated to keep every column tall enough to fill the 3D band.
+  // repeated to keep every column tall enough to fill the 3D band. Only the
+  // first copy of each review is read by a screen reader; the repeats are
+  // marked as duplicates and hidden from assistive tech.
   const slides: MarqueeSlide[] = Array.from({ length: 32 }, (_, i) => {
     const review = reviews[i % reviews.length];
     return {
       id: `${review.name}-${i}`,
       content: <ReviewCard review={review} />,
+      duplicate: i >= reviews.length,
     };
   });
 

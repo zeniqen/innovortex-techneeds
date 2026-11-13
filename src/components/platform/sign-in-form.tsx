@@ -130,7 +130,7 @@ export function SignInForm({ admin = false }: { admin?: boolean }) {
             placeholder={
               role === "mentee" ? "e.g. 7KQ4M2PD" : "you@example.com"
             }
-            className="w-full rounded-xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] px-4 py-3 text-sm transition-colors placeholder:text-[var(--color-stone-haze)] focus:border-[var(--color-caviar)] focus:outline-none focus:ring-2 focus:ring-[var(--color-caviar)]/15"
+            className="w-full rounded-xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] px-4 py-3 text-sm transition-colors placeholder:text-[var(--color-stone-haze)] focus:border-[var(--color-plum-bright)]"
           />
         </div>
 
@@ -150,7 +150,7 @@ export function SignInForm({ admin = false }: { admin?: boolean }) {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder="Your password"
-            className="w-full rounded-xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] px-4 py-3 text-sm transition-colors placeholder:text-[var(--color-stone-haze)] focus:border-[var(--color-caviar)] focus:outline-none focus:ring-2 focus:ring-[var(--color-caviar)]/15"
+            className="w-full rounded-xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] px-4 py-3 text-sm transition-colors placeholder:text-[var(--color-stone-haze)] focus:border-[var(--color-plum-bright)]"
           />
         </div>
 

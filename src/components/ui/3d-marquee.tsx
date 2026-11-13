@@ -13,6 +13,11 @@ export interface MarqueeSlide {
   alt?: string;
   /** Custom content rendered inside the slide box. */
   content?: React.ReactNode;
+  /**
+   * A repeat of another slide, there only to fill the wall. It is hidden
+   * from assistive tech so a screen reader reads each slide once.
+   */
+  duplicate?: boolean;
 }
 
 export const ThreeDMarquee = ({
@@ -67,7 +72,11 @@ export const ThreeDMarquee = ({
               >
                 <GridLineVertical className="-left-4" offset="80px" />
                 {subarray.map((slide, slideIndex) => (
-                  <div className="relative" key={slide.id + slideIndex}>
+                  <div
+                    className="relative"
+                    key={slide.id + slideIndex}
+                    aria-hidden={slide.duplicate || undefined}
+                  >
                     <GridLineHorizontal className="-top-4" offset="20px" />
                     {slide.image ? (
                       <motion.img

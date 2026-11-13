@@ -8,13 +8,16 @@ import {
 } from "@tabler/icons-react";
 
 import { Countdown } from "@/components/platform/countdown";
+import { MarksList } from "@/components/platform/marks-list";
 import { ResourceCard } from "@/components/platform/resource-card";
+import { SinceLastVisit } from "@/components/platform/since-last-visit";
 import { Tabs } from "@/components/platform/tabs";
 import {
   ACCENTS,
   EmptyState,
   PanelCard,
   PanelShell,
+  points,
   ResourceTypeChip,
   StatCard,
 } from "@/components/platform/primitives";
@@ -57,8 +60,12 @@ export async function MenteePanel({ user }: { user: SessionUser }) {
     ).length;
     const myRank = rows.find((row) => row.id === user.id)?.rank ?? null;
 
-    const videos = resources.filter((resource) => resource.type === "video");
-    const work = resources.filter((resource) => resource.type !== "video");
+    // Within each tab, work still to do comes first, then what is handed
+    // in and waiting, then what is marked. The sort is stable, so the
+    // order the work was set in holds inside each group.
+    const byStage = [...resources].sort((a, b) => stage(a) - stage(b));
+    const videos = byStage.filter((resource) => resource.type === "video");
+    const work = byStage.filter((resource) => resource.type !== "video");
 
     // Worked out here, on the server, so the countdown and the "due soon"
     // badges agree between the server's render and the browser's.
@@ -101,6 +108,15 @@ export async function MenteePanel({ user }: { user: SessionUser }) {
             : "You are not on a program yet."
         }
       >
+        <SinceLastVisit
+          userId={user.id}
+          events={events.map(({ id, createdAt, delta }) => ({
+            id,
+            createdAt,
+            delta,
+          }))}
+        />
+
         <UpNext
           next={next}
           now={now}
@@ -108,12 +124,13 @@ export async function MenteePanel({ user }: { user: SessionUser }) {
           openCount={open.length}
         />
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Two to a row from the smallest screens up, so on a phone the
+            four cards do not push the tabs a screen and a half down. */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <StatCard accent="violet" value={profile?.totalScore ?? 0} label="Points" />
           <StatCard accent="amber"
             value={myRank ? `#${myRank}` : "—"}
             label="On the leaderboard"
-            hint={profile?.streak ? `${profile.streak} day streak` : undefined}
           />
           <StatCard accent="green" value={`${completed}/${resources.length}`} label="Marked" />
           <StatCard accent="bronze"
@@ -175,20 +192,15 @@ export async function MenteePanel({ user }: { user: SessionUser }) {
                         description="Marks appear here once a mentor grades your work."
                       />
                     ) : (
-                      <ul className="space-y-2">
-                        {events.slice(0, 12).map((event) => (
-                          <li
-                            key={event.id}
-                            className="flex items-center justify-between gap-3 border-b border-[var(--color-night-white)] py-2 text-sm last:border-b-0"
-                          >
-                            <span className="min-w-0 truncate">{event.reason}</span>
-                            <span className="shrink-0 font-bold tabular-nums">
-                              {event.delta > 0 ? "+" : ""}
-                              {event.delta}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
+                      // The first 12, with a control to show the rest, so
+                      // the tab's count and what can be seen always agree.
+                      <MarksList
+                        events={events.map(({ id, reason, delta }) => ({
+                          id,
+                          reason,
+                          delta,
+                        }))}
+                      />
                     )}
                   </PanelCard>
                 ),
@@ -238,6 +250,12 @@ function ResourceList({
   );
 }
 
+/** Open work first, then handed in and waiting, then marked. */
+function stage(resource: Awaited<ReturnType<typeof listMenteeResources>>[number]) {
+  const status = resource.progress?.status;
+  return status === "graded" ? 2 : status === "submitted" ? 1 : 0;
+}
+
 /** How close a deadline has to be to count as due soon. */
 const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
 
@@ -280,7 +298,7 @@ function UpNext({
             </h2>
             <p className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-[var(--color-iron-fixture)]">
               <ResourceTypeChip type={next.type} />
-              <span>Worth {next.maxScore} points</span>
+              <span>Worth {points(next.maxScore)}</span>
               {next.deadline && (
                 <span
                   className={cn(

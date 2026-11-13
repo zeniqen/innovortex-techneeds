@@ -79,7 +79,17 @@ export function LoadingScreen() {
     document.dispatchEvent(new Event(SPLASH_DONE_EVENT));
   }, []);
 
+  // The overlay, so it can be taken out of the accessibility tree and out
+  // of the tab order the moment the count finishes, rather than only once
+  // the fade-out has run.
+  const overlay = useRef<HTMLDivElement>(null);
+
   const handleComplete = useCallback(() => {
+    const node = overlay.current;
+    if (node) {
+      node.inert = true;
+      node.setAttribute("aria-hidden", "true");
+    }
     setMounted(false);
   }, []);
 
@@ -92,6 +102,7 @@ export function LoadingScreen() {
       {mounted && (
         <motion.div
           key="loading-screen"
+          ref={overlay}
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{
@@ -102,20 +113,25 @@ export function LoadingScreen() {
             },
           }}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8 bg-[var(--color-emptiness)]"
-          role="status"
-          aria-live="polite"
-          aria-label="Loading TechNeeds IGDTUW"
         >
+          {/* The one thing a screen reader hears: a single polite status.
+              Everything else on the splash is decoration and is hidden from
+              assistive tech, so the spinning digits are not read out. */}
+          <p role="status" aria-live="polite" className="sr-only">
+            Loading TechNeeds IGDTUW
+          </p>
+
           {/* Brand mark */}
           <motion.div
             initial={{ opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, ease: EASE_OUT }}
+            aria-hidden
             className="relative h-16 w-16 overflow-hidden rounded-2xl border border-[var(--color-spotted-dove)] bg-[var(--color-night-white)] p-1.5"
           >
             <Image
               src="/assets/logo.png"
-              alt="TechNeeds IGDTUW"
+              alt=""
               fill
               sizes="64px"
               className="object-contain p-0.5"
@@ -123,7 +139,7 @@ export function LoadingScreen() {
             />
           </motion.div>
 
-          <div className="flex flex-col items-center gap-4">
+          <div aria-hidden className="flex flex-col items-center gap-4">
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}

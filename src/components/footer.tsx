@@ -195,18 +195,17 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--color-iron-fixture)]">
           <div className="flex items-center gap-4">
-            <span>TechNeeds IGDTUW © 2025 All Rights Reserved.</span>
+            {/* The year is read from the clock, so it never goes stale. It
+                only differs between the server and the browser on the
+                night the year turns, hence the suppressed warning. */}
+            <span suppressHydrationWarning>
+              © TechNeeds IGDTUW. All rights reserved.
+            </span>
             <PalettePicker />
           </div>
+          {/* There are no terms or privacy pages, so there are no links to
+              them: a link to "#" goes nowhere. */}
           <div className="flex items-center gap-4">
-            <a href="#" className="hover:text-[var(--color-caviar)] transition-colors">
-              Terms of Service
-            </a>
-            <span>•</span>
-            <a href="#" className="hover:text-[var(--color-caviar)] transition-colors">
-              Privacy Policy
-            </a>
-            <span>•</span>
             <span className="flex items-center gap-1">
               Crafted with <IconHeart className="w-3 h-3 text-[var(--color-caviar)] fill-[var(--color-caviar)]" /> for IGDTUW
             </span>

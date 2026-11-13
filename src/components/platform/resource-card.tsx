@@ -13,7 +13,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/platform/dates";
-import { ResourceTypeChip } from "./primitives";
+import { points, ResourceTypeChip } from "./primitives";
 import type { ResourceWithProgress } from "@/lib/platform/types";
 
 /**
@@ -70,18 +70,30 @@ export function ResourceCard({
       id={`resource-${resource.id}`}
       // The kind of work is read from the coloured type chip below, not
       // from a stripe on the card's edge.
+      //
+      // Work still to do is the loudest thing in the list: a firmer border,
+      // a slight shadow and a lift on hover. A marked card steps back - a
+      // faint grey wash, a faint border, quieter title, no lift - and its
+      // green score chip still says how it went.
       className={cn(
-        "rounded-xl border p-4 transition-[background-color,border-color,box-shadow,translate] duration-200 hover:-translate-y-0.5 hover:shadow-md",
+        "rounded-xl border p-4 transition-[background-color,border-color,box-shadow,translate] duration-200",
         done
-          ? "border-[var(--color-gain)]/30 bg-[var(--color-gain)]/5"
+          ? "border-[var(--color-night-white)] bg-[var(--color-night-white)]/25"
           : overdue
-            ? "border-[var(--color-loss)]/30 bg-[var(--color-loss)]/5"
-            : "border-[var(--color-night-white)] bg-[var(--color-emptiness)]",
+            ? "border-[var(--color-loss)]/35 bg-[var(--color-loss)]/5 shadow-sm hover:-translate-y-0.5 hover:shadow-md"
+            : "border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] shadow-sm hover:-translate-y-0.5 hover:shadow-md",
       )}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="flex flex-wrap items-center gap-2 text-sm font-bold">
+          <p
+            className={cn(
+              "flex flex-wrap items-center gap-2 text-sm",
+              done
+                ? "font-semibold text-[var(--color-iron-fixture)]"
+                : "font-bold",
+            )}
+          >
             {resource.title}
             {overdue ? (
               <span className="rounded-full bg-[var(--color-loss)]/10 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide text-[var(--color-loss)]">
@@ -101,7 +113,7 @@ export function ResourceCard({
             <span className="inline-flex items-center gap-1">
               <ResourceTypeChip type={resource.type} />
             </span>
-            <span>Worth {resource.maxScore} points</span>
+            <span>Worth {points(resource.maxScore)}</span>
             {resource.deadline && (
               <span
                 className={cn(
@@ -135,7 +147,13 @@ export function ResourceCard({
               onClick={() =>
                 call(`/api/platform/mentee/resources/${resource.id}/submit`)
               }
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-caviar)] px-3 py-1.5 text-[0.7rem] font-bold text-[var(--color-emptiness)] tn-press hover:bg-[var(--color-iron-fixture)] disabled:opacity-60"
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.7rem] font-bold tn-press disabled:opacity-60",
+                // Once watched, the button stops asking to be pressed.
+                handedIn
+                  ? "border border-[var(--color-spotted-dove)] text-[var(--color-caviar)] hover:bg-[var(--color-night-white)]"
+                  : "bg-[var(--color-caviar)] text-[var(--color-emptiness)] hover:bg-[var(--color-iron-fixture)]",
+              )}
             >
               {busy ? (
                 <IconLoader2 className="h-3.5 w-3.5 animate-spin" />
@@ -249,7 +267,7 @@ function SubmitForm({
           onChange={(event) => setBody(event.target.value)}
           rows={3}
           placeholder="A link to what you built, or your answers."
-          className="mt-1.5 w-full rounded-xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] px-3.5 py-2.5 text-sm transition-colors placeholder:text-[var(--color-stone-haze)] focus:border-[var(--color-caviar)] focus:outline-none focus:ring-2 focus:ring-[var(--color-caviar)]/15"
+          className="mt-1.5 w-full rounded-xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] px-3.5 py-2.5 text-sm transition-colors placeholder:text-[var(--color-stone-haze)] focus:border-[var(--color-plum-bright)]"
         />
       </label>
       <button

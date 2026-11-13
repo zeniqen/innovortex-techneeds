@@ -190,7 +190,8 @@ export function StatCard({
   } as const;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] p-5">
+    // Tighter on a phone, where the cards sit two to a row.
+    <div className="relative overflow-hidden rounded-2xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] p-4 sm:p-5">
       {accent && (
         <span
           aria-hidden
@@ -198,7 +199,7 @@ export function StatCard({
           style={{ background: ACCENTS[accent] }}
         />
       )}
-      <p className={cn("text-3xl font-extrabold tracking-tight", tones[tone])}>
+      <p className={cn("text-2xl font-extrabold tracking-tight sm:text-3xl", tones[tone])}>
         {value}
       </p>
       <p className="mt-1 text-sm font-medium text-[var(--color-caviar)]">{label}</p>
@@ -328,6 +329,11 @@ export function ButtonLink({
  * profile charts use.
  */
 export type Accent = "violet" | "amber" | "green" | "bronze";
+
+/** "1 point", "2 points": a number of points, with the right noun. */
+export function points(count: number) {
+  return `${count} ${Math.abs(count) === 1 ? "point" : "points"}`;
+}
 
 export const ACCENTS: Record<Accent, string> = {
   violet: "var(--color-plum-bright)",

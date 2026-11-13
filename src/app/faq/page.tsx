@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import FaqPage from "@/components/faq-page";
+import { AccordionHeadingLevel } from "@/components/ui/accordion";
 import Footer from "@/components/footer";
 import FloatingDockDemo from "@/components/floating-dock-demo";
 
@@ -13,7 +14,10 @@ export default function Page() {
   return (
     <div className="relative min-h-screen bg-[var(--color-emptiness)] text-[var(--color-caviar)] flex flex-col selection:bg-[var(--color-caviar)] selection:text-[var(--color-emptiness)]">
       <main className="flex-1">
-        <FaqPage />
+        {/* The page title is the h1, so each question is an h2. */}
+        <AccordionHeadingLevel level="h2">
+          <FaqPage />
+        </AccordionHeadingLevel>
       </main>
 
       {/* Footer */}
