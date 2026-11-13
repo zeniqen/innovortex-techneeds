@@ -44,14 +44,20 @@ export function ProfileView({
           the viewport rather than the height of the page: it is cleared and
           redrawn every frame, and a canvas the height of a long page is
           four times the work for a background nobody can tell apart. */}
-      <Particles
-        className="sticky top-0 z-0 h-screen w-full"
-        quantity={70}
-        size={0.5}
-        staticity={60}
-        ease={60}
-        color="#95898B"
-      />
+      {/* The canvas is sticky so it stays in view, but a sticky element
+          still takes up its height in the flow - which pushed the profile
+          a whole screen down. The absolute wrapper spans the page and
+          takes up no room, and the canvas sticks inside it. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+        <Particles
+          className="sticky top-0 h-screen w-full"
+          quantity={70}
+          size={0.5}
+          staticity={60}
+          ease={60}
+          color="#95898B"
+        />
+      </div>
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         {/* --- the header ---------------------------------------------------- */}
