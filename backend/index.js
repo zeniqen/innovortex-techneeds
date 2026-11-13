@@ -12,6 +12,9 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+// The platform's own records come first, so that /api/platform is not
+// swallowed by the catch-all routes further down.
+app.use('/api/platform', require('./routes/platformRoutes'));
 app.use('/api', require('./routes/mentorRoutes')); // All routes under /api
 app.use('/api/m', require('./routes/menteeRoutes'));
 

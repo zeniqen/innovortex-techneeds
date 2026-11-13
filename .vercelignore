@@ -1,0 +1,8 @@
+# The backend is a separate service with its own dependencies. It is not
+# part of the Next.js app and should not be uploaded to it.
+backend/node_modules
+backend/.env
+
+# The local database, and the build output.
+.data
+.next

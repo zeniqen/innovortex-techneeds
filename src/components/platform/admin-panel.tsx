@@ -20,9 +20,9 @@ import {
   PanelShell,
   StatCard,
 } from "@/components/platform/primitives";
-import { queryOne } from "@/lib/platform/db";
 import { formatDateTime } from "@/lib/platform/dates";
 import {
+  counts as platformCounts,
   listMentors,
   listMentorsForProgram,
   listPrograms,
@@ -55,18 +55,10 @@ export async function AdminPanel({
     const selectedMentor =
       mentors.find((mentor) => mentor.id === mentorId) ?? null;
 
-    const counts = await queryOne<{
-      programs: number;
-      mentors: number;
-      mentees: number;
-      resources: number;
-    }>(
-      `SELECT
-         (SELECT count(*) FROM programs)  AS programs,
-         (SELECT count(*) FROM mentors)   AS mentors,
-         (SELECT count(*) FROM mentees)   AS mentees,
-         (SELECT count(*) FROM resources) AS resources`,
-    );
+    // The counts come from the store rather than from a query of this
+    // project's own database, because in the tn mode the data is in the
+    // backend and this project has no database of its own.
+    const counts = await platformCounts();
 
     const activity = await recentAudit(12);
 

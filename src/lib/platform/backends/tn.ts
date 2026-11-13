@@ -1,12 +1,9 @@
-import { cookies } from "next/headers";
-import { createHash } from "node:crypto";
-
 import {
   generateEnrollmentNumber,
   generatePassword,
 } from "../credentials";
-import { SESSION_COOKIE } from "../session-cookie";
-import { queryOne } from "../db";
+import { tnCall } from "./tn-call";
+import { upstreamToken } from "../upstream-token";
 import type {
   LeaderboardRow,
   Mentee,
@@ -32,78 +29,7 @@ import type {
  * writes that need one.
  */
 
-/**
- * Where the tn backend is.
- */
-const BASE = (
-  process.env.TN_BACKEND_URL ?? "http://localhost:8000"
-).replace(/\/$/, "");
-
-/**
- * The key the admin writes need. It never reaches the browser: the
- * frontend's own API routes add it on the server side.
- */
-const ADMIN_KEY = process.env.TN_ADMIN_KEY ?? process.env.ADMIN_KEY ?? "";
-
-/**
- * A request to the tn backend.
- */
-export async function tnCall<T>(
-  path: string,
-  options: {
-    method?: string;
-    body?: unknown;
-    token?: string;
-    admin?: boolean;
-  } = {},
-): Promise<T> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
-  if (options.token) headers["x-auth-token"] = options.token;
-  if (options.admin && ADMIN_KEY) headers["x-admin-key"] = ADMIN_KEY;
-
-  const request = () =>
-    fetch(`${BASE}${path}`, {
-      method: options.method ?? "GET",
-      headers,
-      body:
-        options.body === undefined ? undefined : JSON.stringify(options.body),
-      cache: "no-store",
-    });
-
-  let response: Response;
-  try {
-    response = await request();
-  } catch (error) {
-    // A dropped connection should not take a whole panel down with it, so
-    // it is tried once more before giving up.
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    try {
-      response = await request();
-    } catch {
-      throw new Error(
-        `Could not reach the platform backend at ${BASE}: ${
-          error instanceof Error ? error.message : "the connection failed"
-        }`,
-      );
-    }
-  }
-
-  const text = await response.text();
-  const payload: unknown = text ? JSON.parse(text) : null;
-
-  if (!response.ok) {
-    const message =
-      typeof payload === "object" && payload !== null && "error" in payload
-        ? String((payload as { error: unknown }).error)
-        : `The platform backend answered ${response.status}`;
-    throw new Error(message);
-  }
-
-  return payload as T;
-}
+export { tnCall };
 
 /**
  * The token of whoever is signed in.
@@ -112,15 +38,7 @@ export async function tnCall<T>(
  * session.
  */
 async function sessionToken(): Promise<string | undefined> {
-  const store = await cookies();
-  const session = store.get(SESSION_COOKIE)?.value;
-  if (!session) return undefined;
-
-  const row = await queryOne<{ token: string | null }>(
-    `SELECT token FROM sessions WHERE id = ?`,
-    [createHash("sha256").update(session).digest("hex")],
-  );
-  return row?.token ?? undefined;
+  return (await upstreamToken()) ?? undefined;
 }
 
 /**
@@ -812,4 +730,4 @@ export async function resetPlatform(): Promise<void> {
   }
 }
 
-export { BASE as TN_BACKEND_URL };
+export { BASE as TN_BACKEND_URL } from "./tn-call";

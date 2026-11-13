@@ -33,3 +33,4 @@ yarn-error.log*
 # the backend's own environment file. .env.example is committed so the
 # shape of it is on record, but the values are not.
 /backend/.env
+.vercel

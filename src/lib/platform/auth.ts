@@ -1,6 +1,7 @@
-import { queryOne } from "./db";
 import { verifyPassword } from "./credentials";
-import { tnCall, TN_BACKEND_URL } from "./backends/tn";
+import { queryOne } from "./db";
+import { authenticateAdmin } from "./records";
+import { tnCall } from "./backends/tn-call";
 import { usesTnBackend } from "./store";
 import type { Role, SessionUser } from "./types";
 
@@ -14,6 +15,10 @@ import type { Role, SessionUser } from "./types";
  * are checked against that backend, which is where the accounts live. The
  * token it issues is kept with the session, because that is what it wants
  * to see on every later request.
+ *
+ * The admin is checked against the platform's own records, whichever store
+ * is holding them. The tn backend has no admin role of its own, and an
+ * admin is the person who runs the platform rather than a person in it.
  */
 
 /**
@@ -31,6 +36,10 @@ export async function authenticate(
   identifier: string,
   password: string,
 ): Promise<AuthResult> {
+  if (role === "admin") {
+    return authenticateAdminAccount(identifier, password);
+  }
+
   if (usesTnBackend) {
     return authenticateUpstream(role, identifier, password);
   }
@@ -82,44 +91,12 @@ async function authenticateLocal(
     };
   }
 
-  if (role === "mentor") {
-    const row = await queryOne<{
-      id: string;
-      name: string;
-      email: string;
-      password_hash: string;
-    }>(
-      `SELECT id, name, email, password_hash FROM mentors WHERE email = ?`,
-      [key.toLowerCase()],
-    );
-
-    if (!row) {
-      await verifyPassword(password, "scrypt$AAAAAAAAAAAAAAAAAAAAAA$AAAA");
-      return { ok: false, reason: "invalid" };
-    }
-
-    if (!(await verifyPassword(password, row.password_hash))) {
-      return { ok: false, reason: "invalid" };
-    }
-
-    return {
-      ok: true,
-      user: {
-        role,
-        id: row.id,
-        name: row.name,
-        identifier: row.email,
-        programIds: [],
-      },
-    };
-  }
-
   const row = await queryOne<{
     id: string;
     name: string;
     email: string;
     password_hash: string;
-  }>(`SELECT id, name, email, password_hash FROM admins WHERE email = ?`, [
+  }>(`SELECT id, name, email, password_hash FROM mentors WHERE email = ?`, [
     key.toLowerCase(),
   ]);
 
@@ -135,7 +112,7 @@ async function authenticateLocal(
   return {
     ok: true,
     user: {
-      role: "admin",
+      role,
       id: row.id,
       name: row.name,
       identifier: row.email,
@@ -146,20 +123,12 @@ async function authenticateLocal(
 
 /**
  * Checks the credentials against the tn backend.
- *
- * The admin is still checked against this project's own database: the tn
- * backend has no admin role, and an admin is the person who runs the
- * platform rather than a person in it.
  */
 async function authenticateUpstream(
   role: Role,
   identifier: string,
   password: string,
 ): Promise<AuthResult> {
-  if (role === "admin") {
-    return authenticateLocal(role, identifier, password);
-  }
-
   const path = role === "mentor" ? "/api/mentors/login" : "/api/m/login";
   const body =
     role === "mentor"
@@ -208,8 +177,34 @@ async function authenticateUpstream(
 }
 
 /**
+ * Checks an admin's credentials.
+ *
+ * The password is checked wherever the admins are kept, so the hash
+ * never travels between the frontend and the backend.
+ */
+async function authenticateAdminAccount(
+  identifier: string,
+  password: string,
+): Promise<AuthResult> {
+  const admin = await authenticateAdmin(
+    identifier.trim().toLowerCase(),
+    password,
+  );
+  if (!admin) return { ok: false, reason: "invalid" };
+
+  return {
+    ok: true,
+    user: {
+      role: "admin",
+      id: admin.id,
+      name: admin.name,
+      identifier: admin.email,
+      programIds: [],
+    },
+  };
+}
+
+/**
  * The roles a person can sign in as.
  */
 export const SIGN_IN_ROLES: Role[] = ["mentee", "mentor", "admin"];
-
-export { TN_BACKEND_URL };
