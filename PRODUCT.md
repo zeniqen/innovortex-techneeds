@@ -8,10 +8,12 @@ web
 
 ## Users
 
-The work is judged first. This is a submission to Reimagathon, a hackathon
-that asks teams to reimagine the TechNeeds IGDTUW platform, and the judges
-are the first audience: every surface should make the scored criteria easy
-to see.
+The work is judged first. This is a submission to Reimagathon, a redesign
+challenge: reimagine the existing TechNeeds IGDTUW platform
+(https://techneedsigdtuw.vercel.app) as a modern, production-ready site, with
+backend extensions as a bonus. The judges are the first audience, and they
+score the redesign against the original: every surface should make the
+scored criteria, and the change from the old site, easy to see.
 
 Inside the product, the people who use it most are **mentees on laptops**:
 students of Indira Gandhi Delhi Technical University for Women watching

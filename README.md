@@ -1,8 +1,9 @@
 # TechNeeds IGDTUW
 
-The TechNeeds site and the mentorship platform that goes with it, rebuilt
-for **Reimagathon**, a hackathon that asks teams to reimagine the TechNeeds
-IGDTUW platform.
+The TechNeeds site and the mentorship platform that goes with it, redesigned
+for **Reimagathon**: a challenge to reimagine the existing TechNeeds IGDTUW
+platform (<https://techneedsigdtuw.vercel.app>) as a modern, production-ready
+site, with backend extensions as a bonus.
 
 TechNeeds IGDTUW is a student technology community at Indira Gandhi Delhi
 Technical University for Women, built around peer mentorship: cohorts of
