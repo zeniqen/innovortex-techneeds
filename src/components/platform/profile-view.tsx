@@ -9,6 +9,8 @@ import {
 import { Crest } from "./crest";
 import { Particles } from "@/components/ui/particles";
 import { Chip, PanelCard, StatCard } from "./primitives";
+import { ProfileCharts } from "./profile-charts";
+import type { ProfileCharts as Charts } from "@/lib/platform/ai/charts";
 import { cn } from "@/lib/utils";
 import type { AiProfile } from "@/lib/platform/ai/profile";
 import type { LeaderboardRow } from "@/lib/platform/types";
@@ -22,12 +24,14 @@ import type { LeaderboardRow } from "@/lib/platform/types";
  */
 export function ProfileView({
   profile,
+  charts,
   role,
   leaderboard,
   isSelf,
   showLeaderboard = true,
 }: {
   profile: AiProfile;
+  charts: Charts;
   role: "mentee" | "mentor";
   leaderboard: LeaderboardRow[];
   /** True when this is the signed-in person's own profile. */
@@ -86,6 +90,11 @@ export function ProfileView({
               hint={highlight.detail}
             />
           ))}
+        </div>
+
+        {/* --- the charts ---------------------------------------------------- */}
+        <div className="mt-6">
+          <ProfileCharts charts={charts} role={role} />
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-3">

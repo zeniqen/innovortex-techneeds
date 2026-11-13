@@ -32,7 +32,18 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      // The palette script below sets data-palette before React hydrates.
+      suppressHydrationWarning
     >
+      <head>
+        {/* Applies the chosen palette before the first paint, so a reload
+            does not flash the default palette first. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var p=localStorage.getItem("tn-palette");if(/^(plum|ocean|forest)$/.test(p))document.documentElement.dataset.palette=p}catch(e){}`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-[var(--color-emptiness)] text-[var(--color-caviar)] selection:bg-[var(--color-caviar)] selection:text-[var(--color-emptiness)]">
         {/* The overlay lives in the layout, which persists across client-side
             navigations. That way it plays once on a hard load and never

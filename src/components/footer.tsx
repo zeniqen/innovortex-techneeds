@@ -14,6 +14,8 @@ import {
   IconHeart,
 } from "@tabler/icons-react";
 
+import { PalettePicker } from "./palette-picker";
+
 export default function Footer() {
   return (
     <footer className="relative bg-[var(--color-night-white)]/40 border-t border-[var(--color-night-white)] pt-16 pb-28 text-[var(--color-iron-fixture)] text-xs sm:text-sm">
@@ -192,7 +194,10 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--color-iron-fixture)]">
-          <div>TechNeeds IGDTUW © 2025 All Rights Reserved.</div>
+          <div className="flex items-center gap-4">
+            <span>TechNeeds IGDTUW © 2025 All Rights Reserved.</span>
+            <PalettePicker />
+          </div>
           <div className="flex items-center gap-4">
             <a href="#" className="hover:text-[var(--color-caviar)] transition-colors">
               Terms of Service

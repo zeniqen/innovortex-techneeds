@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { IconUpload, IconUserPlus } from "@tabler/icons-react";
 
+import { ActionBar, ModalButton } from "@/components/platform/modal";
 import {
   AddMenteeForm,
   GradeForm,
@@ -105,6 +107,28 @@ export async function MentorPanel({
           </nav>
         )}
 
+        {/* The two things a mentor comes here to do, first. Each form opens
+            over the page rather than waiting at the bottom of it. */}
+        <ActionBar>
+          <ModalButton
+            label="Add a mentee"
+            icon={<IconUserPlus className="h-3.5 w-3.5" />}
+            title="Add a mentee"
+            description="They get an enrollment number and an initial password. You hand them over."
+          >
+            <AddMenteeForm programId={selected.id} />
+          </ModalButton>
+          <ModalButton
+            label="Publish a resource"
+            icon={<IconUpload className="h-3.5 w-3.5" />}
+            title="Publish a resource"
+            description="A video to watch, a quiz to sit, or a project to build."
+            tone="secondary"
+          >
+            <PublishResourceForm programId={selected.id} />
+          </ModalButton>
+        </ActionBar>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard value={mentees.length} label="Mentees" />
           <StatCard value={resources.length} label="Resources" />
@@ -116,8 +140,37 @@ export async function MentorPanel({
           <StatCard value={totalScore} label="Points earned by your mentees" />
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-3">
-          <div className="space-y-6 lg:col-span-2">
+        <div className="mt-6 space-y-6">
+          {/* Work to mark is the thing that is waiting on the mentor, so it
+              comes before the lists - and only when there is some. */}
+          {awaiting.length > 0 && (
+            <PanelCard
+              title="Marking"
+              description="Work that has been handed in and has not been given a mark yet."
+            >
+              <ul className="grid gap-4 md:grid-cols-2">
+                {awaiting.map((entry) => (
+                  <li
+                    key={`${entry.resource.id}-${entry.mentee.id}`}
+                    className="rounded-xl border border-[var(--color-night-white)] p-4"
+                  >
+                    <p className="text-sm font-bold">{entry.mentee.name}</p>
+                    <p className="mt-0.5 mb-3 text-xs text-[var(--color-iron-fixture)]">
+                      {entry.resource.title} · worth {entry.resource.maxScore}{" "}
+                      points
+                    </p>
+                    <GradeForm
+                      resourceId={entry.resource.id}
+                      menteeId={entry.mentee.id}
+                      maxScore={entry.resource.maxScore}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </PanelCard>
+          )}
+
+          <div className="grid gap-6 lg:grid-cols-2">
             <PanelCard
               title="Mentees"
               description="Everyone on this program. Each one signs in with an enrollment number."
@@ -125,7 +178,7 @@ export async function MentorPanel({
               {mentees.length === 0 ? (
                 <EmptyState
                   title="No mentees yet"
-                  description="Add the first one below."
+                  description="Add the first one with the button above."
                 />
               ) : (
                 <ul>
@@ -168,7 +221,7 @@ export async function MentorPanel({
               {resources.length === 0 ? (
                 <EmptyState
                   title="Nothing published yet"
-                  description="Publish the first one on the right."
+                  description="Publish the first one with the button above."
                 />
               ) : (
                 <ul>
@@ -197,54 +250,6 @@ export async function MentorPanel({
                   })}
                 </ul>
               )}
-            </PanelCard>
-
-            <PanelCard
-              title="Marking"
-              description="Work that has been handed in and has not been given a mark yet."
-            >
-              {awaiting.length === 0 ? (
-                <EmptyState
-                  title="Nothing waiting"
-                  description="Everything handed in has been marked."
-                />
-              ) : (
-                <ul className="space-y-5">
-                  {awaiting.map((entry) => (
-                    <li
-                      key={`${entry.resource.id}-${entry.mentee.id}`}
-                      className="rounded-xl border border-[var(--color-night-white)] p-4"
-                    >
-                      <p className="text-sm font-bold">{entry.mentee.name}</p>
-                      <p className="mt-0.5 mb-3 text-xs text-[var(--color-iron-fixture)]">
-                        {entry.resource.title} · worth {entry.resource.maxScore}{" "}
-                        points
-                      </p>
-                      <GradeForm
-                        resourceId={entry.resource.id}
-                        menteeId={entry.mentee.id}
-                        maxScore={entry.resource.maxScore}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </PanelCard>
-          </div>
-
-          <div className="space-y-6">
-            <PanelCard
-              title="Add a mentee"
-              description="They get an enrollment number and an initial password. You hand them over."
-            >
-              <AddMenteeForm programId={selected.id} />
-            </PanelCard>
-
-            <PanelCard
-              title="Publish a resource"
-              description="A video to watch, a quiz to sit, or a project to build."
-            >
-              <PublishResourceForm programId={selected.id} />
             </PanelCard>
           </div>
         </div>

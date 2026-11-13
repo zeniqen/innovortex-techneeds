@@ -5,6 +5,7 @@ import { IconTrash } from "@tabler/icons-react";
 
 import { ActionForm, RemoveButton, type FieldSpec } from "./action-form";
 import { CredentialCard } from "./credential-card";
+import { useCloseModal } from "./modal";
 
 /**
  * The mentor panel's writes.
@@ -158,11 +159,16 @@ export function PublishResourceForm({ programId }: { programId: string }) {
     },
   ];
 
+  // Nothing comes back that needs showing, so the modal can close once
+  // the resource is published.
+  const closeModal = useCloseModal();
+
   return (
     <ActionForm
       action="/api/platform/mentor/resources"
       fields={fields}
       submitLabel="Publish"
+      onDone={() => closeModal?.()}
     >
       <input type="hidden" name="programId" value={programId} />
     </ActionForm>

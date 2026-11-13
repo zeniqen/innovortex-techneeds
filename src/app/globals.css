@@ -33,6 +33,37 @@
   --color-loss: #DC2626;
 }
 
+/* User-selectable palettes. Each one re-tints the six neutral tokens and
+   nothing else, so the layout and contrast stay what they are and only
+   the temperature changes. Graphite, the :root above, is the default.
+   The choice is set on <html> by the script in the root layout. */
+:root[data-palette="plum"] {
+  --color-emptiness: #FCFBFE;
+  --color-night-white: #E6E1EF;
+  --color-spotted-dove: #C6BED6;
+  --color-stone-haze: #8E84A3;
+  --color-iron-fixture: #5A5070;
+  --color-caviar: #2A1F45;
+}
+
+:root[data-palette="ocean"] {
+  --color-emptiness: #FAFCFD;
+  --color-night-white: #DDE5EA;
+  --color-spotted-dove: #B9C6CF;
+  --color-stone-haze: #84939E;
+  --color-iron-fixture: #4F5E69;
+  --color-caviar: #1D2D3A;
+}
+
+:root[data-palette="forest"] {
+  --color-emptiness: #FBFCFA;
+  --color-night-white: #DFE5DE;
+  --color-spotted-dove: #BCC8BA;
+  --color-stone-haze: #87958A;
+  --color-iron-fixture: #536155;
+  --color-caviar: #1F2E24;
+}
+
 @theme inline {
   --color-emptiness: var(--color-emptiness);
   --color-night-white: var(--color-night-white);

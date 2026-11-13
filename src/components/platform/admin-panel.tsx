@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { IconPlus, IconShieldPlus, IconUserPlus } from "@tabler/icons-react";
 
+import { ActionBar, ModalButton } from "@/components/platform/modal";
 import {
   AddAdminForm,
   AssignProgramForm,
@@ -85,6 +87,37 @@ export async function AdminPanel({
         title="Programs and people"
         description="Create the programs the mentors run, onboard mentors, and put them on the programs they look after."
       >
+        {/* Adding things is what an admin comes here to do, so the forms
+            are one click away at the top and open over the page. */}
+        <ActionBar>
+          <ModalButton
+            label="Onboard a mentor"
+            icon={<IconUserPlus className="h-3.5 w-3.5" />}
+            title="Onboard a mentor"
+            description="Mentors sign in with their email address."
+          >
+            <OnboardMentorForm />
+          </ModalButton>
+          <ModalButton
+            label="Create a program"
+            icon={<IconPlus className="h-3.5 w-3.5" />}
+            title="Create a program"
+            description="A program is a cohort of mentees looked after by one or more mentors."
+            tone="secondary"
+          >
+            <CreateProgramForm />
+          </ModalButton>
+          <ModalButton
+            label="Add an admin"
+            icon={<IconShieldPlus className="h-3.5 w-3.5" />}
+            title="Add an admin"
+            description="Admins manage the programs and the mentors."
+            tone="secondary"
+          >
+            <AddAdminForm />
+          </ModalButton>
+        </ActionBar>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard value={counts?.programs ?? 0} label="Programs" />
           <StatCard value={counts?.mentors ?? 0} label="Mentors" />
@@ -233,22 +266,9 @@ export async function AdminPanel({
               </PanelCard>
             )}
 
-            <PanelCard
-              title="Create a program"
-              description="A program is a cohort of mentees looked after by one or more mentors."
-            >
-              <CreateProgramForm />
-            </PanelCard>
           </div>
 
           <div className="space-y-6">
-            <PanelCard
-              title="Onboard a mentor"
-              description="Mentors sign in with their email address."
-            >
-              <OnboardMentorForm />
-            </PanelCard>
-
             <PanelCard
               title="Mentors"
               description={`${mentors.length} on the platform.`}
@@ -290,13 +310,6 @@ export async function AdminPanel({
                   <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[var(--color-emptiness)] to-transparent" />
                 </div>
               )}
-            </PanelCard>
-
-            <PanelCard
-              title="Add an admin"
-              description="Admins manage the programs and the mentors."
-            >
-              <AddAdminForm />
             </PanelCard>
 
             <PanelCard title="Recent activity" description="What has changed.">

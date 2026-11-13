@@ -24,6 +24,7 @@ import {
   type ProfileMentee,
   type ProfileResource,
 } from "@/lib/platform/ai/profile";
+import { buildProfileCharts } from "@/lib/platform/ai/charts";
 
 export const metadata: Metadata = {
   title: "Profile | TechNeeds IGDTUW",
@@ -88,6 +89,7 @@ async function ProfileBody({ params }: { params: Promise<{ id: string }> }) {
     return (
       <ProfileView
         profile={buildProfile(input, now)}
+        charts={buildProfileCharts(input)}
         role="mentor"
         leaderboard={rows}
         isSelf={user.id === mentor.id}
@@ -112,6 +114,7 @@ async function ProfileBody({ params }: { params: Promise<{ id: string }> }) {
   return (
     <ProfileView
       profile={buildProfile(input, now)}
+      charts={buildProfileCharts(input)}
       role="mentee"
       leaderboard={rows}
       isSelf={user.id === mentee.id}

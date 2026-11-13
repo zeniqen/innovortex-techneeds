@@ -3,6 +3,7 @@ import { IconSparkles } from "@tabler/icons-react";
 
 import { LiveLeaderboard } from "@/components/platform/live-leaderboard";
 import { ResourceCard } from "@/components/platform/resource-card";
+import { Tabs } from "@/components/platform/tabs";
 import {
   EmptyState,
   PanelCard,
@@ -46,6 +47,9 @@ export async function MenteePanel({ user }: { user: SessionUser }) {
     ).length;
     const myRank = rows.find((row) => row.id === user.id)?.rank ?? null;
 
+    const videos = resources.filter((resource) => resource.type === "video");
+    const work = resources.filter((resource) => resource.type !== "video");
+
     return (
       <PanelShell
         role="mentee"
@@ -59,6 +63,16 @@ export async function MenteePanel({ user }: { user: SessionUser }) {
             : "You are not on a program yet."
         }
       >
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          <Link
+            href="/profile/me"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-caviar)] px-4 py-2.5 text-xs font-bold text-[var(--color-emptiness)] transition-colors hover:bg-[var(--color-iron-fixture)]"
+          >
+            <IconSparkles className="h-3.5 w-3.5" />
+            Open my profile
+          </Link>
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard value={profile?.totalScore ?? 0} label="Points" />
           <StatCard
@@ -74,77 +88,121 @@ export async function MenteePanel({ user }: { user: SessionUser }) {
           />
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-3">
-          <div className="space-y-6 lg:col-span-2">
-            <PanelCard
-              title="Your resources"
-              description="Everything your mentors have set you. Work that is overdue is marked."
-            >
-              {resources.length === 0 ? (
-                <EmptyState
-                  title="Nothing assigned yet"
-                  description="Your mentors have not set you any work."
-                />
-              ) : (
-                <ul className="space-y-3">
-                  {resources.map((resource) => (
-                    <ResourceCard key={resource.id} resource={resource} />
-                  ))}
-                </ul>
-              )}
-            </PanelCard>
-
-            <PanelCard
-              title="Your marks"
-              description="Every mark you have been given, most recent first."
-            >
-              {events.length === 0 ? (
-                <EmptyState
-                  title="No marks yet"
-                  description="Marks appear here once a mentor grades your work."
-                />
-              ) : (
-                <ul className="space-y-2">
-                  {events.slice(0, 12).map((event) => (
-                    <li
-                      key={event.id}
-                      className="flex items-center justify-between gap-3 border-b border-[var(--color-night-white)] py-2 text-sm last:border-b-0"
-                    >
-                      <span className="min-w-0 truncate">{event.reason}</span>
-                      <span className="shrink-0 font-bold tabular-nums">
-                        {event.delta > 0 ? "+" : ""}
-                        {event.delta}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </PanelCard>
-          </div>
-
-          <div className="space-y-6">
-            <PanelCard
-              title="Leaderboard"
-              description="Where you are, updated as other people hand work in."
-            >
-              <LiveLeaderboard currentId={user.id} fallback={rows} />
-            </PanelCard>
-
-            <PanelCard
-              title="Your profile"
-              description="Your progress, summarised and turned into a profile."
-            >
-              <Link
-                href="/profile/me"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-caviar)] px-4 py-2.5 text-xs font-bold text-[var(--color-emptiness)] transition-colors hover:bg-[var(--color-iron-fixture)]"
-              >
-                <IconSparkles className="h-3.5 w-3.5" />
-                Open my profile
-              </Link>
-            </PanelCard>
-          </div>
+        {/* One long page of everything became hard to find your way
+            around, so each kind of thing has its own tab. Videos are
+            separate from the work that is marked, because watching and
+            handing in are different jobs. */}
+        <div className="mt-6">
+          <Tabs
+            tabs={[
+              {
+                id: "videos",
+                label: "Videos",
+                count: videos.length,
+                content: (
+                  <ResourceList
+                    resources={videos}
+                    title="Videos"
+                    description="Watch them and mark them as watched. Overdue ones are marked."
+                    emptyTitle="No videos yet"
+                    emptyDescription="Your mentors have not set you any videos."
+                  />
+                ),
+              },
+              {
+                id: "work",
+                label: "Quizzes & projects",
+                count: work.length,
+                content: (
+                  <ResourceList
+                    resources={work}
+                    title="Quizzes and projects"
+                    description="The work you hand in and get marked on. Overdue work is marked."
+                    emptyTitle="Nothing to hand in yet"
+                    emptyDescription="Your mentors have not set you a quiz or a project."
+                  />
+                ),
+              },
+              {
+                id: "marks",
+                label: "Marks",
+                count: events.length,
+                content: (
+                  <PanelCard
+                    title="Your marks"
+                    description="Every mark you have been given, most recent first."
+                  >
+                    {events.length === 0 ? (
+                      <EmptyState
+                        title="No marks yet"
+                        description="Marks appear here once a mentor grades your work."
+                      />
+                    ) : (
+                      <ul className="space-y-2">
+                        {events.slice(0, 12).map((event) => (
+                          <li
+                            key={event.id}
+                            className="flex items-center justify-between gap-3 border-b border-[var(--color-night-white)] py-2 text-sm last:border-b-0"
+                          >
+                            <span className="min-w-0 truncate">{event.reason}</span>
+                            <span className="shrink-0 font-bold tabular-nums">
+                              {event.delta > 0 ? "+" : ""}
+                              {event.delta}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </PanelCard>
+                ),
+              },
+              {
+                id: "leaderboard",
+                label: "Leaderboard",
+                content: (
+                  <PanelCard
+                    title="Leaderboard"
+                    description="Where you are, updated as other people hand work in."
+                  >
+                    <LiveLeaderboard currentId={user.id} fallback={rows} />
+                  </PanelCard>
+                ),
+              },
+            ]}
+          />
         </div>
       </PanelShell>
     );
 
+}
+
+/**
+ * One kind of resource, as a card of resource cards.
+ */
+function ResourceList({
+  resources,
+  title,
+  description,
+  emptyTitle,
+  emptyDescription,
+}: {
+  resources: Awaited<ReturnType<typeof listMenteeResources>>;
+  title: string;
+  description: string;
+  emptyTitle: string;
+  emptyDescription: string;
+}) {
+  return (
+    <PanelCard title={title} description={description}>
+      {resources.length === 0 ? (
+        <EmptyState title={emptyTitle} description={emptyDescription} />
+      ) : (
+        <ul className="grid gap-3 lg:grid-cols-2">
+          {resources.map((resource) => (
+            <ResourceCard key={resource.id} resource={resource} />
+          ))}
+        </ul>
+      )}
+    </PanelCard>
+  );
 }
