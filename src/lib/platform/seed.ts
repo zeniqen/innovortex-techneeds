@@ -419,9 +419,30 @@ export async function seedPlatform(): Promise<SeedReport> {
   }
 
   // --- a sign-in for each role --------------------------------------------
-  // The mentor and the mentee that are reported are the ones with the
-  // most going on, because those are the ones worth looking at.
-  const demoMentor = sourceMentors.find((m) => m.name === "Dr. Smith") ?? sourceMentors[0];
+  // The mentor that is reported is the one with the most mentees, and
+  // the mentee is the one with the most work behind them. Those are the
+  // two accounts worth looking at: a mentor with nobody on their program
+  // shows an empty panel, and a mentee with nothing finished shows an
+  // empty profile.
+  const menteesPerProgram = new Map<string, number>();
+  for (const mentee of sourceMentees) {
+    for (const programId of mentee.programs ?? []) {
+      menteesPerProgram.set(
+        programId,
+        (menteesPerProgram.get(programId) ?? 0) + 1,
+      );
+    }
+  }
+
+  const menteesOf = (mentor: SourceMentor) =>
+    (mentor.programs ?? []).reduce((sum, program) => {
+      const id = typeof program === "string" ? program : program._id;
+      return sum + (id ? (menteesPerProgram.get(id) ?? 0) : 0);
+    }, 0);
+
+  const demoMentor = [...sourceMentors].sort(
+    (a, b) => menteesOf(b) - menteesOf(a),
+  )[0];
 
   const demoMentee = [...sourceMentees].sort(
     (a, b) => (b.totalScore ?? 0) - (a.totalScore ?? 0),
