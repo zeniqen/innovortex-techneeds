@@ -71,7 +71,8 @@ export function ModalButton({
         onClick={(event) => {
           if (event.target === dialog.current) close();
         }}
-        className="m-auto w-[min(36rem,calc(100vw-2rem))] rounded-2xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] p-0 text-[var(--color-caviar)] shadow-2xl backdrop:bg-[var(--color-caviar)]/40 backdrop:backdrop-blur-[2px]"
+        // tn-modal (globals.css) fades and scales it in and out.
+        className="tn-modal m-auto w-[min(36rem,calc(100vw-2rem))] rounded-2xl border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)] p-0 text-[var(--color-caviar)] shadow-2xl backdrop:bg-[var(--color-caviar)]/40 backdrop:backdrop-blur-[2px]"
       >
         <div className="max-h-[85vh] overflow-y-auto p-6">
           <div className="mb-5 flex items-start justify-between gap-4">

@@ -17,45 +17,51 @@ interface SlideProps {
 
 const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
   const slideRef = useRef<HTMLLIElement>(null);
+  // The image layer that drifts with the pointer.
+  const layerRef = useRef<HTMLDivElement>(null);
 
   const xRef = useRef(0);
   const yRef = useRef(0);
   const frameRef = useRef<number | undefined>(undefined);
 
+  // The drift used to run a requestAnimationFrame loop on every slide for
+  // as long as the page was open, writing CSS variables on the slide that
+  // its child read back. Now one frame is scheduled per pointer move, and
+  // the transform is written straight onto the layer that moves.
+  const scheduleDrift = () => {
+    if (frameRef.current !== undefined) return;
+    frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = undefined;
+      const layer = layerRef.current;
+      if (!layer) return;
+      layer.style.transform = `translate3d(${xRef.current / 30}px, ${yRef.current / 30}px, 0)`;
+    });
+  };
+
   useEffect(() => {
-    const animate = () => {
-      if (!slideRef.current) return;
-
-      const x = xRef.current;
-      const y = yRef.current;
-
-      slideRef.current.style.setProperty("--x", `${x}px`);
-      slideRef.current.style.setProperty("--y", `${y}px`);
-
-      frameRef.current = requestAnimationFrame(animate);
-    };
-
-    frameRef.current = requestAnimationFrame(animate);
-
     return () => {
-      if (frameRef.current) {
+      if (frameRef.current !== undefined) {
         cancelAnimationFrame(frameRef.current);
       }
     };
   }, []);
 
   const handleMouseMove = (event: React.MouseEvent) => {
+    // Only the slide in front drifts.
+    if (current !== index) return;
     const el = slideRef.current;
     if (!el) return;
 
     const r = el.getBoundingClientRect();
     xRef.current = event.clientX - (r.left + Math.floor(r.width / 2));
     yRef.current = event.clientY - (r.top + Math.floor(r.height / 2));
+    scheduleDrift();
   };
 
   const handleMouseLeave = () => {
     xRef.current = 0;
     yRef.current = 0;
+    scheduleDrift();
   };
 
   const imageLoaded = (event: React.SyntheticEvent<HTMLImageElement>) => {
@@ -68,7 +74,7 @@ const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
     <div className="[perspective:1200px] [transform-style:preserve-3d]">
       <li
         ref={slideRef}
-        className="flex flex-1 flex-col items-center justify-center relative text-center text-white opacity-100 transition-all duration-300 ease-in-out w-[70vmin] h-[70vmin] mx-[4vmin] z-10 "
+        className="flex flex-1 flex-col items-center justify-center relative text-center text-white opacity-100 w-[70vmin] h-[70vmin] mx-[4vmin] z-10 "
         onClick={() => handleSlideClick(index)}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -82,13 +88,11 @@ const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
         }}
       >
         <div
-          className="absolute top-0 left-0 w-full h-full bg-[#1D1F2F] rounded-[1%] overflow-hidden transition-all duration-150 ease-out"
-          style={{
-            transform:
-              current === index
-                ? "translate3d(calc(var(--x) / 30), calc(var(--y) / 30), 0)"
-                : "none",
-          }}
+          ref={layerRef}
+          className="absolute top-0 left-0 w-full h-full bg-[#1D1F2F] rounded-[1%] overflow-hidden transition-transform duration-150 ease-out"
+          // The slide in front is moved by scheduleDrift; the others are
+          // held still.
+          style={current === index ? undefined : { transform: "none" }}
         >
           <img
             className="absolute inset-0 w-[120%] h-[120%] object-cover opacity-100 transition-opacity duration-600 ease-in-out"
@@ -102,7 +106,7 @@ const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
             decoding="sync"
           />
           {current === index && (
-            <div className="absolute inset-0 bg-black/30 transition-all duration-1000" />
+            <div className="absolute inset-0 bg-black/30" />
           )}
         </div>
 

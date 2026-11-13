@@ -8,6 +8,7 @@ import {
   MotionValue,
   motion,
   useMotionValue,
+  useReducedMotion,
   useSpring,
   useTransform,
 } from "motion/react";
@@ -82,7 +83,7 @@ const FloatingDockMobile = ({
       <button
         onClick={() => setOpen(!open)}
         aria-label="Toggle Dock Menu"
-        className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-caviar)] border border-[var(--color-caviar)] shadow-xl text-[var(--color-emptiness)] hover:scale-105 transition-all"
+        className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-caviar)] border border-[var(--color-caviar)] shadow-xl text-[var(--color-emptiness)] hover:scale-105 transition-transform"
       >
         <IconLayoutNavbarCollapse className="h-6 w-6" />
       </button>
@@ -98,9 +99,15 @@ const FloatingDockDesktop = ({
   className?: string;
 }) => {
   const mouseX = useMotionValue(Infinity);
+  // The magnification follows the pointer on every move. For anyone who
+  // has asked for reduced motion the pointer is not fed in, so every icon
+  // rests at its normal size; the tooltips and colour changes still work.
+  const reduceMotion = useReducedMotion();
   return (
     <motion.div
-      onMouseMove={(e) => mouseX.set(e.pageX)}
+      onMouseMove={(e) => {
+        if (!reduceMotion) mouseX.set(e.pageX);
+      }}
       onMouseLeave={() => mouseX.set(Infinity)}
       className={cn(
         "mx-auto hidden h-16 items-end gap-3.5 rounded-full border border-[var(--color-spotted-dove)] bg-[var(--color-emptiness)]/90 px-4 pb-2.5 backdrop-blur-md shadow-lg md:flex",

@@ -67,7 +67,7 @@ export default function Hero() {
           <div className="pt-2 flex flex-wrap items-center justify-center gap-4">
             <a
               href="#cohorts"
-              className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm text-[var(--color-emptiness)] bg-[var(--color-caviar)] hover:bg-[var(--color-iron-fixture)] shadow-md transition-all hover:-translate-y-0.5 active:translate-y-0"
+              className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm text-[var(--color-emptiness)] bg-[var(--color-caviar)] hover:bg-[var(--color-iron-fixture)] shadow-md transition-[translate,background-color,box-shadow] hover:-translate-y-0.5 active:translate-y-0"
             >
               <span>Explore Cohorts</span>
               <IconArrowRight className="w-4 h-4" />
@@ -75,7 +75,7 @@ export default function Hero() {
 
             <a
               href="#glimpse"
-              className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm text-[var(--color-caviar)] bg-[var(--color-night-white)] hover:bg-[var(--color-spotted-dove)]/40 border border-[var(--color-spotted-dove)] transition-all hover:-translate-y-0.5 active:translate-y-0"
+              className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm text-[var(--color-caviar)] bg-[var(--color-night-white)] hover:bg-[var(--color-spotted-dove)]/40 border border-[var(--color-spotted-dove)] transition-[translate,background-color,box-shadow] hover:-translate-y-0.5 active:translate-y-0"
             >
               <IconRocket className="w-4 h-4 text-[var(--color-bronze-deep)]" />
               <span>Community Events</span>

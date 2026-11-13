@@ -147,17 +147,25 @@ body {
 }
 
 /* The custom cursor in src/components/ui/smooth-cursor.tsx replaces the
-   native one. Without this the two are drawn on top of each other. */
-* {
-  cursor: none !important;
-}
+   native one. Without this the two are drawn on top of each other.
 
-/* A caret is more use than an arrow in a field. The custom cursor gets out
-   of the way over one, so the native caret is the only one showing. */
-input,
-textarea,
-select {
-  cursor: text !important;
+   The native cursor is only hidden where the custom one actually runs:
+   the component stands down without a fine, hovering pointer and for
+   anyone who has asked for reduced motion, and hiding the cursor there
+   too left those people with no cursor at all. These conditions must
+   match the component's own. */
+@media (any-hover: hover) and (any-pointer: fine) and (prefers-reduced-motion: no-preference) {
+  * {
+    cursor: none !important;
+  }
+
+  /* A caret is more use than an arrow in a field. The custom cursor gets
+     out of the way over one, so the native caret is the only one showing. */
+  input,
+  textarea,
+  select {
+    cursor: text !important;
+  }
 }
 
 /* Custom minimal scrollbar */
@@ -235,6 +243,90 @@ select {
     animation: none;
     opacity: 1;
     filter: none;
+  }
+}
+
+/* The platform's pop-up forms (src/components/platform/modal.tsx).
+
+   A native <dialog> appears and disappears in one frame. This fades it in
+   with a slight rise in scale, so the form reads as arriving rather than
+   being swapped in, and the backdrop fades with it. Opening takes 200ms;
+   closing is quicker at 150ms, because the person has already decided.
+
+   The transition the browser uses is the one on the state being moved
+   into, so the [open] rule holds the opening timing and the base rule the
+   closing timing. `overlay` and `display` with allow-discrete keep the
+   dialog on screen while it fades out; where a browser does not support
+   that, it closes instantly, as before. */
+.tn-modal {
+  opacity: 0;
+  scale: 0.96;
+  transition:
+    opacity 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    scale 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    overlay 150ms allow-discrete,
+    display 150ms allow-discrete;
+}
+
+.tn-modal[open] {
+  opacity: 1;
+  scale: 1;
+  transition-duration: 200ms;
+}
+
+@starting-style {
+  .tn-modal[open] {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+
+.tn-modal::backdrop {
+  opacity: 0;
+  transition:
+    opacity 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    overlay 150ms allow-discrete,
+    display 150ms allow-discrete;
+}
+
+.tn-modal[open]::backdrop {
+  opacity: 1;
+  transition-duration: 200ms;
+}
+
+@starting-style {
+  .tn-modal[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+/* The points-over-time line on the profile, revealed left to right the
+   first time it is drawn - the order the points happened in. */
+.tn-chart-reveal {
+  /* backwards, not both: once the line is drawn the clip is gone, so it
+     never trims anything later. */
+  animation: tn-chart-reveal 700ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
+}
+
+@keyframes tn-chart-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Reduced motion keeps the fade - it helps to see a form arrive - but
+   drops the movement, and shows the chart without the reveal. */
+@media (prefers-reduced-motion: reduce) {
+  .tn-modal,
+  .tn-modal[open] {
+    scale: 1;
+  }
+
+  .tn-chart-reveal {
+    animation: none;
   }
 }
 

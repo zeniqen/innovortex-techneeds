@@ -100,7 +100,7 @@ export default function Stats() {
             <div
               key={idx}
               style={{ "--accent": stat.accent } as React.CSSProperties}
-              className="relative group overflow-hidden rounded-2xl p-6 bg-[var(--color-emptiness)] border border-[var(--color-spotted-dove)] hover:border-[var(--accent)] transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+              className="relative group overflow-hidden rounded-2xl p-6 bg-[var(--color-emptiness)] border border-[var(--color-spotted-dove)] hover:border-[var(--accent)] transition-[translate,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:shadow-md"
             >
               {/* A thin line of the card's colour along the top. */}
               <span aria-hidden className="absolute inset-x-0 top-0 h-1 bg-[var(--accent)]" />

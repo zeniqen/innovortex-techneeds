@@ -57,7 +57,8 @@ export function ScoreChart({
         // strokes keep their width with non-scaling-stroke, and the hover
         // dot is drawn outside the SVG so it stays round.
         preserveAspectRatio="none"
-        className="block h-32 w-full overflow-visible"
+        // tn-chart-reveal (globals.css) draws the line in left to right.
+        className="tn-chart-reveal block h-32 w-full overflow-visible"
         role="img"
         aria-label={`Points over time, from ${series[0].total} to ${series[series.length - 1].total}`}
         onMouseLeave={() => setHover(null)}
