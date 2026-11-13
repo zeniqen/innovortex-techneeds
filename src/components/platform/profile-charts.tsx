@@ -5,11 +5,30 @@ import type { ProfileCharts as Charts } from "@/lib/platform/ai/charts";
 /**
  * The charts on the profile.
  *
- * Every chart is drawn in the theme's ink, one hue at different
- * strengths, so they follow the palette picker and stay as quiet as the
- * rest of the page. Each bar carries its numbers as text beside it, so
- * nothing is told by colour alone.
+ * Each kind of work has one colour, and keeps it wherever it is drawn:
+ * violet for videos, amber for quizzes, green for projects. The colours
+ * are the site's own accent tokens and were checked for colour-blind
+ * separation. Each bar carries its numbers as text beside it, so nothing
+ * is told by colour alone - which also covers amber being light against
+ * the page.
  */
+const TYPE_COLOR: Record<string, string> = {
+  video: "var(--color-plum-bright)",
+  quiz: "var(--color-gold-deep)",
+  project: "var(--color-gain)",
+};
+
+/**
+ * The status colours run from done to untouched: marked is green, handed
+ * in is waiting on a mentor so it is amber, in progress is violet, and
+ * not started is the plain track grey.
+ */
+const STATUS_COLOR = [
+  "var(--color-gain)",
+  "var(--color-gold-deep)",
+  "var(--color-plum-bright)",
+  "var(--color-spotted-dove)",
+];
 export function ProfileCharts({
   charts,
   role,
@@ -37,6 +56,7 @@ export function ProfileCharts({
               value: row.done,
               max: role === "mentor" ? Math.max(...charts.byType.map((r) => r.total)) : row.total,
               text: role === "mentor" ? `${row.total}` : `${row.done} of ${row.total}`,
+              color: TYPE_COLOR[row.type],
             }))}
           />
         ) : (
@@ -68,6 +88,7 @@ export function ProfileCharts({
                 value: mentee.score,
                 max: Math.max(1, charts.mentees[0].score),
                 text: `${mentee.score}`,
+                color: "var(--color-gain)",
               }))}
             />
           ) : (
@@ -95,7 +116,14 @@ export function ProfileCharts({
 function BarRows({
   rows,
 }: {
-  rows: { key: string; label: string; value: number; max: number; text: string }[];
+  rows: {
+    key: string;
+    label: string;
+    value: number;
+    max: number;
+    text: string;
+    color: string;
+  }[];
 }) {
   return (
     <ul className="space-y-3">
@@ -111,8 +139,11 @@ function BarRows({
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-[var(--color-night-white)]">
               <div
-                className="h-full rounded-full bg-[var(--color-caviar)] transition-[width] duration-500"
-                style={{ width: `${Math.round(fraction * 100)}%` }}
+                className="h-full rounded-full transition-[width] duration-500"
+                style={{
+                  width: `${Math.round(fraction * 100)}%`,
+                  background: row.color,
+                }}
               />
             </div>
           </li>
@@ -123,12 +154,9 @@ function BarRows({
 }
 
 /**
- * The status split, as one bar cut into parts.
- *
- * The parts are in order from finished to untouched, so the shades run
- * from the darkest to the lightest - the order is the meaning.
+ * The status split, as one bar cut into parts, in order from finished to
+ * untouched.
  */
-const SHADES = [1, 0.62, 0.36, 0.16];
 
 function StatusBar({
   segments,
@@ -151,7 +179,7 @@ function StatusBar({
               className="h-full"
               style={{
                 flexGrow: segment.count,
-                background: `color-mix(in srgb, var(--color-caviar) ${SHADES[index] * 100}%, var(--color-emptiness))`,
+                background: STATUS_COLOR[index],
               }}
             />
           ),
@@ -165,7 +193,7 @@ function StatusBar({
               aria-hidden
               className="h-2.5 w-2.5 rounded-sm"
               style={{
-                background: `color-mix(in srgb, var(--color-caviar) ${SHADES[index] * 100}%, var(--color-emptiness))`,
+                background: STATUS_COLOR[index],
               }}
             />
             <span className="text-[var(--color-iron-fixture)]">{segment.label}</span>

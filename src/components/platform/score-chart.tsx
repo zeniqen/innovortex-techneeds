@@ -78,11 +78,11 @@ export function ScoreChart({
           y2={y(min)}
           stroke="var(--color-night-white)"
         />
-        <path d={area} fill="var(--color-caviar)" fillOpacity={0.08} />
+        <path d={area} fill="var(--color-gain)" fillOpacity={0.12} />
         <path
           d={line}
           fill="none"
-          stroke="var(--color-caviar)"
+          stroke="var(--color-gain)"
           strokeWidth={2}
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -102,7 +102,7 @@ export function ScoreChart({
       {active && hover !== null && (
         <span
           aria-hidden
-          className="pointer-events-none absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-caviar)] ring-2 ring-[var(--color-emptiness)]"
+          className="pointer-events-none absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-gain)] ring-2 ring-[var(--color-emptiness)]"
           style={{
             left: `${(x(hover) / width) * 100}%`,
             top: `${(y(active.total) / height) * 100}%`,
