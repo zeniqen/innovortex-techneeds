@@ -3,7 +3,11 @@ import {
   resetPlatform,
   counts as platformCounts,
 } from "@/lib/platform/store";
-import { createAdmin, resetAdmins } from "@/lib/platform/admin-store";
+import {
+  adminCount,
+  createAdmin,
+  resetAdmins,
+} from "@/lib/platform/admin-store";
 import { seedPlatform } from "@/lib/platform/seed";
 import { currentUser } from "@/lib/platform/session";
 import { generatePassword } from "@/lib/platform/credentials";
@@ -13,9 +17,10 @@ import { usesTnBackend } from "@/lib/platform/store";
  * Setting the platform up.
  *
  * There is no way in until there is an admin, so this route is how the
- * first one is made. It only works while the platform is empty: once it
- * has programs, the route needs an admin to be signed in, and every
- * further admin has to be made by an admin who is already signed in.
+ * first one is made. It only works until the platform is set up - in the
+ * SQLite mode while it has no programs, in the tn mode while it has no
+ * admin - and after that every further admin has to be made by an admin
+ * who is already signed in.
  *
  * The body may ask for the live data to be copied in as well:
  *
@@ -78,11 +83,14 @@ async function setupAgainstBackend(input: {
   email: string;
   password: string;
 }) {
-  const hasPrograms = (await programCount()) > 0;
+  // The backend already holds programs before anyone has set the platform
+  // up, so whether it is set up is whether it has an admin - the same
+  // question the status route asks.
+  const hasAdmin = (await adminCount()) > 0;
 
-  if (hasPrograms) {
-    // Making an admin changes who can run the platform, so once the
-    // platform is in use it takes an admin to ask for it.
+  if (hasAdmin) {
+    // Making an admin changes who can run the platform, so once there is
+    // one it takes an admin to ask for another.
     const user = await currentUser();
     if (!user || user.role !== "admin") {
       return Response.json(
