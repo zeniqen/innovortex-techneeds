@@ -34,3 +34,6 @@ yarn-error.log*
 # shape of it is on record, but the values are not.
 /backend/.env
 .vercel
+
+# The showcase deck, screenshots and pitch script stay local.
+/pitch/

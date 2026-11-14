@@ -6,3 +6,6 @@ backend/.env
 # The local database, and the build output.
 .data
 .next
+
+# The showcase deck is not part of the app.
+pitch
